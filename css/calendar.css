@@ -1,0 +1,104 @@
+/* Kalendāra konteiners */
+.calendar-container {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    width: 520px;
+  }
+  
+  /* Mēneša navigācija */
+  .month-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    border: 2px solid rgba(221, 221, 221, 0.56);
+    border-radius: 6px;
+    background-color: #fff;
+    margin-bottom: 20px;
+  }
+  
+  .month-dropdown {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+  
+  .month-dropdown .month-name {
+    font-weight: 500;
+    color: #333333eb;
+  }
+  
+  .month-dropdown .arrow {
+    font-size: 0.8rem;
+    color: #333;
+  }
+  
+  .nav-arrows {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .nav-arrows a {
+    text-decoration: none;
+    font-size: 1.2rem;
+    color: #333;
+  }
+  
+  .nav-arrows a:hover {
+    color: #611e71;
+  }
+  
+  /* Kalendāra tabula */
+  .calendar {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .calendar thead {
+    background-color: #f0f0f0;
+  }
+  
+  .calendar th,
+  .calendar td {
+    width: calc(100% / 7);
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+  }
+  
+  .calendar td {
+    height: 50px;
+    vertical-align: middle;
+    cursor: pointer;
+  }
+  
+  .calendar td:hover {
+    background-color: #eaeaea;
+  }
+  
+  .selectable {
+    cursor: pointer;
+    background-color: #e6f7ff;
+  }
+  
+  .selectable a {
+    text-decoration: none;
+    color: black;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .selectable a:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .selected {
+    background-color: #d3d3d3;
+    font-weight: bold;
+  }
