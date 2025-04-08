@@ -1,9 +1,14 @@
 <?php
-// admin/edit.php
 require_once '../middleware.php';
 runMiddleware();
 
 require_once '../config/db_connection.php';
+
+// Pārbaudām, vai lietotājs ir ielogojies
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    header("Location: login.php");
+    exit;
+}
 
 // Pārbaudām, vai GET parametrā ir rezervācijas ID
 if (!isset($_GET['id'])) {
@@ -25,14 +30,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $stmt->bind_param("issssi", $serviceId, $bookingDate, $timeSlot, $userName, $phone, $bookingId);
 
     if ($stmt->execute()) {
-        $message = "Rezervācija veiksmīgi atjaunināta!";
+        $_SESSION['message'] = "Rezervācija veiksmīgi atjaunināta!";
     } else {
-        $message = "Kļūda atjauninot rezervāciju: " . $stmt->error;
+        $_SESSION['message'] = "Kļūda atjauninot rezervāciju: " . $stmt->error;
     }
     $stmt->close();
+    header("Location: index.php");
+    exit;
 }
 
-// Ielādējam rezervācijas datus no datubāzes
+// Ielādējam rezervācijas datus
 $stmt = $conn->prepare("SELECT * FROM bookings WHERE id = ?");
 $stmt->bind_param("i", $bookingId);
 $stmt->execute();
@@ -51,15 +58,14 @@ if (!$booking) {
     <meta charset="UTF-8">
     <title>Labot rezervāciju</title>
     <link rel="stylesheet" href="../css/base.css">
-    <!-- Papildu stili pēc vajadzības -->
 </head>
 <body>
     <?php include '../includes/header.php'; ?>
     <div class="container">
         <h1>Labot rezervāciju</h1>
-        <?php if (isset($message)): ?>
+        <?php if (isset($_SESSION['message'])): ?>
             <div class="message">
-                <?php echo $message; ?>
+                <?php echo htmlspecialchars($_SESSION['message']); unset($_SESSION['message']); ?>
             </div>
         <?php endif; ?>
         <form method="POST" action="edit.php?id=<?php echo $bookingId; ?>">
@@ -84,7 +90,7 @@ if (!$booking) {
                 <label for="phone">Telefona numurs:</label>
                 <input type="text" name="phone" id="phone" value="<?php echo htmlspecialchars($booking['phone']); ?>" required>
             </div>
-            <button type="submit" class="btn btn-primary">Atjaunināt rezervāciju</button>
+            <button type="submit">Atjaunināt rezervāciju</button>
         </form>
         <a href="index.php">Atpakaļ uz admin paneli</a>
     </div>

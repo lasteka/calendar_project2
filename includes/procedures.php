@@ -27,8 +27,8 @@
 ?>
     <div class="procedures">
         <h2>Reģistrācija pakalpojumam: <?php echo htmlspecialchars($service['name']); ?>, laiks: <?php echo htmlspecialchars($selectedSlot); ?>, datums: <?php echo htmlspecialchars($selectedDate); ?></h2>
-        <?php if ($bookingMessage): ?>
-            <p><?php echo htmlspecialchars($bookingMessage); ?></p>
+        <?php if (isset($_SESSION['booking_message'])): ?>
+            <p><?php echo htmlspecialchars($_SESSION['booking_message']); ?></p>
         <?php else: ?>
             <form action="?selected_date=<?php echo urlencode($selectedDate); ?>" method="post">
                 <input type="hidden" name="action" value="book_service">

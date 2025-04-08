@@ -3,15 +3,17 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Kopīgas funkcijas
 require_once '../middleware.php';
 runMiddleware();
 
-// Pieprasījums: pievienojam jaunu rezervāciju
-
 require_once '../config/db_connection.php';
 
-// Izvēlētais datums no GET vai noklusējuma šodiena
+// Pārbaudām, vai lietotājs ir ielogojies
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
+}
+
 $selectedDate = isset($_GET['selected_date']) ? $_GET['selected_date'] : date('Y-m-d');
 
 // Kalendāra aprēķini
@@ -73,13 +75,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'show_services' && isset($_GET
 }
 
 // Rezervācijas apstrāde
-$bookingMessage = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'book_service') {
     $serviceId = (int)$_POST['service_id'];
     $selectedSlot = $_POST['slot'];
     $userName = $_POST['user_name'];
     $phone = $_POST['phone'];
     $bookingDate = $_POST['booking_date'];
+    $userId = (int)$_SESSION['user_id'];
 
     $checkStmt = $conn->prepare("SELECT COUNT(*) FROM bookings WHERE time_slot = ? AND booking_date = ?");
     $checkStmt->bind_param("ss", $selectedSlot, $bookingDate);
@@ -89,30 +91,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $checkStmt->close();
 
     if ($count > 0) {
-        $bookingMessage = "Šis laika slots jau ir rezervēts!";
+        $_SESSION['booking_message'] = "Šis laika slots jau ir rezervēts!";
     } else {
-        $stmt = $conn->prepare("INSERT INTO bookings (service_id, time_slot, booking_date, user_name, phone) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("issss", $serviceId, $selectedSlot, $bookingDate, $userName, $phone);
+        $stmt = $conn->prepare("INSERT INTO bookings (service_id, time_slot, booking_date, user_name, phone, user_id) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("issssi", $serviceId, $selectedSlot, $bookingDate, $userName, $phone, $userId);
         if ($stmt->execute()) {
-            $bookingMessage = "Rezervācija veiksmīga!";
+            $_SESSION['booking_message'] = "Rezervācija veiksmīga!";
         } else {
-            $bookingMessage = "Rezervācijas saglabāšana neizdevās: " . $stmt->error;
+            $_SESSION['booking_message'] = "Rezervācijas saglabāšana neizdevās: " . $stmt->error;
         }
         $stmt->close();
     }
+    header("Location: index.php?selected_date=" . urlencode($selectedDate));
+    exit;
 }
 
 // Rezervācijas atcelšana
 if (isset($_GET['action']) && $_GET['action'] === 'cancel_booking' && isset($_GET['booking_id'])) {
     $bookingId = (int)$_GET['booking_id'];
-    $stmt = $conn->prepare("DELETE FROM bookings WHERE id = ?");
-    $stmt->bind_param("i", $bookingId);
+    $userId = (int)$_SESSION['user_id'];
+
+    // Pārbaudām, vai rezervācija pieder lietotājam
+    $stmt = $conn->prepare("DELETE FROM bookings WHERE id = ? AND user_id = ?");
+    $stmt->bind_param("ii", $bookingId, $userId);
     if ($stmt->execute()) {
-        $cancelMessage = "Jūsu rezervācija ir veiksmīgi atcelta.";
+        if ($stmt->affected_rows > 0) {
+            $_SESSION['booking_message'] = "Rezervācija veiksmīgi atcelta!";
+        } else {
+            $_SESSION['booking_message'] = "Rezervācija netika atrasta vai jums nav tiesību to atcelt!";
+        }
     } else {
-        $cancelMessage = "Kļūda atceļot rezervāciju: " . $stmt->error;
+        $_SESSION['booking_message'] = "Kļūda atceļot rezervāciju: " . $stmt->error;
     }
     $stmt->close();
+    header("Location: index.php?selected_date=" . urlencode($selectedDate));
+    exit;
 }
 ?>
 <!DOCTYPE html>
@@ -128,10 +141,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'cancel_booking' && isset($_GE
 </head>
 <body>
     <?php include '../includes/header.php'; ?>
+    <div class="container">
+        <a href="logout.php">Izlogoties</a>
+    </div>
 
-    <?php if ($bookingMessage): ?>
+    <?php if (isset($_SESSION['booking_message'])): ?>
         <div class="message">
-            <?php echo htmlspecialchars($bookingMessage); ?>
+            <?php echo htmlspecialchars($_SESSION['booking_message']); unset($_SESSION['booking_message']); ?>
         </div>
     <?php endif; ?>
 

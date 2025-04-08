@@ -1,6 +1,6 @@
 <?php
-// middleware.php
-// Kopīgas funkcijas, kas izpildās katram pieprasījumam (piemēram, žurnāla ieraksts un uzturēšanas režīma pārbaude).
+// Sākam sesiju
+session_start();
 
 function runMiddleware() {
     // Žurnāla ieraksts: saglabājam pieprasījuma laiku un URI
@@ -10,11 +10,11 @@ function runMiddleware() {
     }
     file_put_contents('logs/request.log', $log, FILE_APPEND);
 
-    // Uzturēšanas režīma pārbaude – ja fails maintenance.flag eksistē, apturam izpildi
+    // Uzturēšanas režīma pārbaude
     if (file_exists('maintenance.flag')) {
         header('HTTP/1.1 503 Service Unavailable');
         echo "Vietne šobrīd ir uzturēšanas režīmā. Lūdzu, mēģiniet vēlāk.";
         exit;
     }
 }
-
+?>
