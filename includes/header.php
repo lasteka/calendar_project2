@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>MR ONLAINS Calendar</title>
-    <link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="css/calendar.css">
-    <link rel="stylesheet" href="css/timeslots.css">
-    <link rel="stylesheet" href="css/procedures.css">
-    <link rel="stylesheet" href="css/bookings.css">
+    <link rel="stylesheet" href="../css/base.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="../css/calendar.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="../css/timeslots.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="../css/procedures.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="../css/bookings.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <header>

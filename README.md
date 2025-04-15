@@ -25,7 +25,35 @@ calendar_project/
 └── README.md                 # Projekta dokumentācija
 
 # Calendar Project
-
+calendar_project/
+├── css/
+│   ├── admin.css        ← Stili admin paneļa lapām (index.php, edit.php, login.php)
+│   ├── base.css        ← Vispārējie stili visam projektam
+│   ├── calendar.css    ← Kalendāra stili (public/index.php)
+│   ├── timeslots.css   ← Laika slotu stili (public/index.php)
+│   ├── procedures.css  ← Procedūru stili (public/index.php)
+│   ├── bookings.css    ← Rezervāciju stili (public/index.php)
+├── includes/
+│   ├── header.php      ← Galvenes saturs (<header> bez <html>, <head>, <body>)
+│   ├── timeslots.php   ← Laika slotu HTML ģenerēšana
+│   ├── calendar.php    ← Kalendāra HTML (nav sniegts saturs)
+│   ├── procedures.php  ← Procedūru HTML (nav sniegts saturs)
+│   ├── bookings.php    ← Rezervāciju HTML (nav sniegts saturs)
+│   ├── footer.php      ← Kājenes saturs (nav sniegts saturs)
+├── public/
+│   ├── index.php       ← Galvenā lapa (kalendārs, laika sloti, procedūras)
+│   ├── login.php       ← Lietotāju ielogošanās (nav sniegts saturs)
+│   ├── register.php    ← Lietotāju reģistrācija (sniegts)
+│   ├── logout.php      ← Lietotāju izlogošanās (sniegts)
+├── admin/
+│   ├── index.php       ← Admin panelis (rezervāciju saraksts)
+│   ├── edit.php        ← Rezervāciju rediģēšana
+│   ├── login.php       ← Admin ielogošanās
+│   ├── logout.php      ← Admin izlogošanās
+├── config/
+│   ├── db_connection.php ← Datubāzes savienojums (nav sniegts saturs)
+├── middleware.php         ← Vidusprogrammatūra (sesiju pārbaude, nav sniegts saturs)
+├── middleware.php         ← Vidusprogrammatūra (piemēram, sesiju pārbaude)
 Šis projekts ir rezervāciju sistēma ar kalendāru, kas izmanto PHP, HTML, CSS un SQL. Projekta struktūra atdalīta starp publisko (klienta) pusi un administratīvo daļu.
 
 ## Struktūra

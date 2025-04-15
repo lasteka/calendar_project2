@@ -10,16 +10,22 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     exit;
 }
 
-// Iegūstam visus rezervāciju ierakstus
-$result = $conn->query("SELECT * FROM bookings ORDER BY booking_date, time_slot");
+// Iegūstam visus rezervāciju ierakstus ar pakalpojumu nosaukumiem un lietotāju e-pastiem
+$result = $conn->query("
+    SELECT b.*, s.name AS service_name, u.email AS user_email 
+    FROM bookings b 
+    LEFT JOIN services s ON b.service_id = s.id 
+    LEFT JOIN users u ON b.user_id = u.id 
+    ORDER BY b.booking_date, b.time_slot
+");
 ?>
 <!DOCTYPE html>
 <html lang="lv">
 <head>
     <meta charset="UTF-8">
     <title>Admin Panelis – Rezervācijas</title>
-    <link rel="stylesheet" href="../css/base.css">
-    <link rel="stylesheet" href="../css/bookings.css">
+    <link rel="stylesheet" href="../css/base.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="../css/admin.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <?php include '../includes/header.php'; ?>
@@ -31,11 +37,12 @@ $result = $conn->query("SELECT * FROM bookings ORDER BY booking_date, time_slot"
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Pakalpojuma ID</th>
+                    <th>Pakalpojums</th>
                     <th>Datums</th>
                     <th>Laiks</th>
                     <th>Klienta vārds</th>
                     <th>Telefona numurs</th>
+                    <th>Lietotāja e-pasts</th>
                     <th>Darbības</th>
                 </tr>
             </thead>
@@ -43,11 +50,12 @@ $result = $conn->query("SELECT * FROM bookings ORDER BY booking_date, time_slot"
                 <?php while($row = $result->fetch_assoc()): ?>
                     <tr>
                         <td><?= $row['id']; ?></td>
-                        <td><?= $row['service_id']; ?></td>
-                        <td><?= $row['booking_date']; ?></td>
+                        <td><?= htmlspecialchars($row['service_name']) . " (ID: " . $row['service_id'] . ")"; ?></td>
+                        <th><?= $row['booking_date']; ?></th>
                         <td><?= $row['time_slot']; ?></td>
                         <td><?= htmlspecialchars($row['user_name']); ?></td>
                         <td><?= htmlspecialchars($row['phone']); ?></td>
+                        <td><?= htmlspecialchars($row['user_email']); ?></td>
                         <td><a href="edit.php?id=<?= $row['id']; ?>">Rediģēt</a></td>
                     </tr>
                 <?php endwhile; ?>

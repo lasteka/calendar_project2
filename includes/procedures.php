@@ -8,7 +8,7 @@
                         <?php echo htmlspecialchars($srv['name']); ?>
                     </a>
                 </p>
-                <p class="procedure-price">Cena: <?php echo htmlspecialchars($srv['price']); ?> €</p>
+                <p class="procedure-price">Cena: <?php echo htmlspecialchars($srv['price']); ?> € | Ilgums: <?php echo htmlspecialchars($srv['duration']); ?> min</p>
             </div>
         <?php endforeach; ?>
     </div>
@@ -27,6 +27,7 @@
 ?>
     <div class="procedures">
         <h2>Reģistrācija pakalpojumam: <?php echo htmlspecialchars($service['name']); ?>, laiks: <?php echo htmlspecialchars($selectedSlot); ?>, datums: <?php echo htmlspecialchars($selectedDate); ?></h2>
+        <p>Ilgums: <?php echo htmlspecialchars($service['duration']); ?> minūtes</p>
         <?php if (isset($_SESSION['booking_message'])): ?>
             <p><?php echo htmlspecialchars($_SESSION['booking_message']); ?></p>
         <?php else: ?>

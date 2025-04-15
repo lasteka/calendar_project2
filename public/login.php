@@ -18,16 +18,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
-    $user = $result->fetch_assoc();
-    $stmt->close();
-
-    if ($user && password_verify($password, $user['password'])) {
-        $_SESSION['user_id'] = $user['id'];
-        header("Location: index.php");
-        exit;
+    if ($user = $result->fetch_assoc()) {
+        if (password_verify($password, $user['password'])) {
+            $_SESSION['user_id'] = $user['id'];
+            header("Location: index.php");
+            exit;
+        } else {
+            $loginError = "Nepareizs e-pasts vai parole!";
+        }
     } else {
         $loginError = "Nepareizs e-pasts vai parole!";
     }
+    $stmt->close();
 }
 ?>
 <!DOCTYPE html>
@@ -35,7 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Ielogoties</title>
-    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/base.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="../css/admin.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <div class="container">

@@ -1,8 +1,4 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 require_once '../middleware.php';
 runMiddleware();
 
@@ -37,32 +33,69 @@ if ($nextMonth > 12) {
     $nextYear++;
 }
 
-// Laika slotu ielāde
-$timeslotsQuery = "
-    SELECT t.day_part, t.time_slot 
-    FROM timeslots t
-    LEFT JOIN bookings b ON t.time_slot = b.time_slot AND b.booking_date = ?
-    WHERE b.time_slot IS NULL
-    ORDER BY FIELD(t.day_part, 'morning', 'day', 'evening'), STR_TO_DATE(t.time_slot, '%H:%i')";
-$stmt = $conn->prepare($timeslotsQuery);
-$stmt->bind_param("s", $selectedDate);
-$stmt->execute();
-$resultTimeslots = $stmt->get_result();
-$timeslots = [];
+// Ielādējam visus laika slotus
+$timeslotsQuery = "SELECT id, day_part, time_slot FROM timeslots ORDER BY FIELD(day_part, 'morning', 'day', 'evening'), STR_TO_DATE(time_slot, '%H:%i')";
+$resultTimeslots = $conn->query($timeslotsQuery);
+$allTimeslots = [];
 while ($row = $resultTimeslots->fetch_assoc()) {
-    $timeslots[$row['day_part']][] = $row['time_slot'];
+    $allTimeslots[$row['day_part']][] = $row;
 }
 $resultTimeslots->free();
+
+// Iegūstam visas rezervācijas izvēlētajā datumā
+$bookingsQuery = "
+    SELECT b.time_slot, s.duration 
+    FROM bookings b
+    JOIN services s ON b.service_id = s.id
+    WHERE b.booking_date = ?
+";
+$stmt = $conn->prepare($bookingsQuery);
+$stmt->bind_param("s", $selectedDate);
+$stmt->execute();
+$bookingsResult = $stmt->get_result();
+$bookedSlots = [];
+while ($booking = $bookingsResult->fetch_assoc()) {
+    $bookedSlots[] = [
+        'time_slot' => $booking['time_slot'],
+        'duration' => $booking['duration']
+    ];
+}
+$bookingsResult->free();
 $stmt->close();
 
-// Pakalpojumu ielāde
+// Filtrējam pieejamos laika slotus, ņemot vērā rezervācijas un procedūras ilgumu
+$timeslots = [];
+foreach ($allTimeslots as $dayPart => $slots) {
+    $timeslots[$dayPart] = [];
+    foreach ($slots as $slot) {
+        $slotTime = strtotime($slot['time_slot']);
+        $isAvailable = true;
+
+        foreach ($bookedSlots as $booked) {
+            $bookedStart = strtotime($booked['time_slot']);
+            $bookedEnd = strtotime("+{$booked['duration']} minutes", $bookedStart);
+
+            if ($slotTime >= $bookedStart && $slotTime < $bookedEnd) {
+                $isAvailable = false;
+                break;
+            }
+        }
+
+        if ($isAvailable) {
+            $timeslots[$dayPart][] = $slot['time_slot'];
+        }
+    }
+}
+
+// Pakalpojumu ielāde ar duration
 $showServices = false;
 $selectedSlot = null;
+$selectedServiceId = null;
 if (isset($_GET['action']) && $_GET['action'] === 'show_services' && isset($_GET['slot'])) {
     $showServices = true;
     $selectedSlot = $_GET['slot'];
 
-    $servicesQuery = "SELECT * FROM services";
+    $servicesQuery = "SELECT id, name, price, duration FROM services";
     $servicesResult = $conn->query($servicesQuery);
     if (!$servicesResult) {
         die("Kļūda pakalpojumu vaicājumā: " . $conn->error);
@@ -74,7 +107,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'show_services' && isset($_GET
     $servicesResult->free();
 }
 
-// Rezervācijas apstrāde
+// Rezervācijas apstrāde ar papildu validāciju
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'book_service') {
     $serviceId = (int)$_POST['service_id'];
     $selectedSlot = $_POST['slot'];
@@ -83,15 +116,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $bookingDate = $_POST['booking_date'];
     $userId = (int)$_SESSION['user_id'];
 
-    $checkStmt = $conn->prepare("SELECT COUNT(*) FROM bookings WHERE time_slot = ? AND booking_date = ?");
-    $checkStmt->bind_param("ss", $selectedSlot, $bookingDate);
+    $stmt = $conn->prepare("SELECT duration FROM services WHERE id = ?");
+    $stmt->bind_param("i", $serviceId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $service = $result->fetch_assoc();
+    $duration = $service['duration'];
+    $stmt->close();
+
+    $slotStart = strtotime($selectedSlot);
+    $slotEnd = strtotime("+{$duration} minutes", $slotStart);
+
+    $checkStmt = $conn->prepare("
+        SELECT COUNT(*) 
+        FROM bookings b
+        JOIN services s ON b.service_id = s.id
+        WHERE b.booking_date = ?
+        AND (
+            (STR_TO_DATE(b.time_slot, '%H:%i') >= STR_TO_DATE(?, '%H:%i') AND STR_TO_DATE(b.time_slot, '%H:%i') < DATE_ADD(STR_TO_DATE(?, '%H:%i'), INTERVAL ? MINUTE))
+            OR
+            (STR_TO_DATE(?, '%H:%i') >= STR_TO_DATE(b.time_slot, '%H:%i') AND STR_TO_DATE(?, '%H:%i') < DATE_ADD(STR_TO_DATE(b.time_slot, '%H:%i'), INTERVAL s.duration MINUTE))
+        )
+    ");
+    $checkStmt->bind_param("sssiss", $bookingDate, $selectedSlot, $selectedSlot, $duration, $selectedSlot, $selectedSlot);
     $checkStmt->execute();
     $checkStmt->bind_result($count);
     $checkStmt->fetch();
     $checkStmt->close();
 
     if ($count > 0) {
-        $_SESSION['booking_message'] = "Šis laika slots jau ir rezervēts!";
+        $_SESSION['booking_message'] = "Šis laika slots jau ir aizņemts vai pārklājas ar citu rezervāciju!";
     } else {
         $stmt = $conn->prepare("INSERT INTO bookings (service_id, time_slot, booking_date, user_name, phone, user_id) VALUES (?, ?, ?, ?, ?, ?)");
         $stmt->bind_param("issssi", $serviceId, $selectedSlot, $bookingDate, $userName, $phone, $userId);
@@ -111,7 +165,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'cancel_booking' && isset($_GE
     $bookingId = (int)$_GET['booking_id'];
     $userId = (int)$_SESSION['user_id'];
 
-    // Pārbaudām, vai rezervācija pieder lietotājam
     $stmt = $conn->prepare("DELETE FROM bookings WHERE id = ? AND user_id = ?");
     $stmt->bind_param("ii", $bookingId, $userId);
     if ($stmt->execute()) {
@@ -127,35 +180,23 @@ if (isset($_GET['action']) && $_GET['action'] === 'cancel_booking' && isset($_GE
     header("Location: index.php?selected_date=" . urlencode($selectedDate));
     exit;
 }
+
+include '../includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="lv">
-<head>
-    <meta charset="UTF-8">
-    <title>MR ONLAINS Calendar</title>
-    <link rel="stylesheet" href="../css/base.css">
-    <link rel="stylesheet" href="../css/calendar.css">
-    <link rel="stylesheet" href="../css/timeslots.css">
-    <link rel="stylesheet" href="../css/procedures.css">
-    <link rel="stylesheet" href="../css/bookings.css">
-</head>
-<body>
-    <?php include '../includes/header.php'; ?>
-    <div class="container">
-        <a href="logout.php">Izlogoties</a>
+<div class="container">
+    <a href="logout.php">Izlogoties</a>
+</div>
+
+<?php if (isset($_SESSION['booking_message'])): ?>
+    <div class="message">
+        <?php echo htmlspecialchars($_SESSION['booking_message']); unset($_SESSION['booking_message']); ?>
     </div>
+<?php endif; ?>
 
-    <?php if (isset($_SESSION['booking_message'])): ?>
-        <div class="message">
-            <?php echo htmlspecialchars($_SESSION['booking_message']); unset($_SESSION['booking_message']); ?>
-        </div>
-    <?php endif; ?>
-
-    <?php include '../includes/calendar.php'; ?>
-    <?php include '../includes/timeslots.php'; ?>
-    <?php include '../includes/procedures.php'; ?>
-    <?php include '../includes/bookings.php'; ?>
-    
-    <?php include '../includes/footer.php'; ?>
+<?php include '../includes/calendar.php'; ?>
+<?php include '../includes/timeslots.php'; ?>
+<?php include '../includes/procedures.php'; ?>
+<?php include '../includes/bookings.php'; ?>
+<?php include '../includes/footer.php'; ?>
 </body>
 </html>

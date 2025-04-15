@@ -39,8 +39,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
-// Ielādējam rezervācijas datus
-$stmt = $conn->prepare("SELECT * FROM bookings WHERE id = ?");
+// Ielādējam rezervācijas datus ar pakalpojuma nosaukumu un lietotāja e-pastu
+$stmt = $conn->prepare("
+    SELECT b.*, s.name AS service_name, u.email AS user_email 
+    FROM bookings b 
+    LEFT JOIN services s ON b.service_id = s.id 
+    LEFT JOIN users u ON b.user_id = u.id 
+    WHERE b.id = ?
+");
 $stmt->bind_param("i", $bookingId);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -51,13 +57,23 @@ if (!$booking) {
     echo "Rezervācija ar ID {$bookingId} netika atrasta.";
     exit;
 }
+
+// Ielādējam visus pakalpojumus, lai izveidotu izvēles lauku
+$servicesQuery = "SELECT id, name FROM services ORDER BY name";
+$servicesResult = $conn->query($servicesQuery);
+$services = [];
+while ($srv = $servicesResult->fetch_assoc()) {
+    $services[] = $srv;
+}
+$servicesResult->free();
 ?>
 <!DOCTYPE html>
 <html lang="lv">
 <head>
     <meta charset="UTF-8">
     <title>Labot rezervāciju</title>
-    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/base.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="../css/admin.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <?php include '../includes/header.php'; ?>
@@ -71,8 +87,15 @@ if (!$booking) {
         <form method="POST" action="edit.php?id=<?php echo $bookingId; ?>">
             <input type="hidden" name="action" value="update_booking">
             <div class="form-group">
-                <label for="service_id">Pakalpojuma ID:</label>
-                <input type="number" name="service_id" id="service_id" value="<?php echo htmlspecialchars($booking['service_id']); ?>" required>
+                <label for="service_id">Pakalpojums:</label>
+                <select name="service_id" id="service_id" required>
+                    <?php foreach ($services as $service): ?>
+                        <option value="<?php echo $service['id']; ?>" <?php echo $booking['service_id'] == $service['id'] ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($service['name']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <p>Aktuālais pakalpojums: <?php echo htmlspecialchars($booking['service_name']); ?> (ID: <?php echo $booking['service_id']; ?>)</p>
             </div>
             <div class="form-group">
                 <label for="booking_date">Datums:</label>
@@ -89,6 +112,10 @@ if (!$booking) {
             <div class="form-group">
                 <label for="phone">Telefona numurs:</label>
                 <input type="text" name="phone" id="phone" value="<?php echo htmlspecialchars($booking['phone']); ?>" required>
+            </div>
+            <div class="form-group">
+                <label for="user_email">Lietotāja e-pasts:</label>
+                <input type="text" name="user_email" id="user_email" value="<?php echo htmlspecialchars($booking['user_email']); ?>" readonly>
             </div>
             <button type="submit">Atjaunināt rezervāciju</button>
         </form>
