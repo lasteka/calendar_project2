@@ -32,7 +32,7 @@ $result = $conn->query("
 
     <div class="container">
         <h1>Visas rezervācijas</h1>
-        <a href="logout.php">Izlogoties</a>
+        <a href="../logout.php">Izlogoties</a>
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -51,7 +51,7 @@ $result = $conn->query("
                     <tr>
                         <td><?= $row['id']; ?></td>
                         <td><?= htmlspecialchars($row['service_name']) . " (ID: " . $row['service_id'] . ")"; ?></td>
-                        <th><?= $row['booking_date']; ?></th>
+                        <td><?= $row['booking_date']; ?></td>
                         <td><?= $row['time_slot']; ?></td>
                         <td><?= htmlspecialchars($row['user_name']); ?></td>
                         <td><?= htmlspecialchars($row['phone']); ?></td>

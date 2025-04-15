@@ -124,9 +124,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $duration = $service['duration'];
     $stmt->close();
 
-    $slotStart = strtotime($selectedSlot);
-    $slotEnd = strtotime("+{$duration} minutes", $slotStart);
-
     $checkStmt = $conn->prepare("
         SELECT COUNT(*) 
         FROM bookings b
@@ -184,7 +181,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'cancel_booking' && isset($_GE
 include '../includes/header.php';
 ?>
 <div class="container">
-    <a href="logout.php">Izlogoties</a>
+    <a href="../logout.php" class="logout-link">Izlogoties</a>
 </div>
 
 <?php if (isset($_SESSION['booking_message'])): ?>
