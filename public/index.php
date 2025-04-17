@@ -63,7 +63,7 @@ while ($booking = $bookingsResult->fetch_assoc()) {
 $bookingsResult->free();
 $stmt->close();
 
-// Filtrējam pieejamos laika slotus, ņemot vērā rezervācijas un procedūras ilgumu
+// Filtrējam pieejamos laika slotus
 $timeslots = [];
 foreach ($allTimeslots as $dayPart => $slots) {
     $timeslots[$dayPart] = [];
@@ -87,19 +87,15 @@ foreach ($allTimeslots as $dayPart => $slots) {
     }
 }
 
-// Pakalpojumu ielāde ar duration
+// Pakalpojumu ielāde
 $showServices = false;
 $selectedSlot = null;
-$selectedServiceId = null;
 if (isset($_GET['action']) && $_GET['action'] === 'show_services' && isset($_GET['slot'])) {
     $showServices = true;
     $selectedSlot = $_GET['slot'];
 
     $servicesQuery = "SELECT id, name, price, duration FROM services";
     $servicesResult = $conn->query($servicesQuery);
-    if (!$servicesResult) {
-        die("Kļūda pakalpojumu vaicājumā: " . $conn->error);
-    }
     $services = [];
     while ($srv = $servicesResult->fetch_assoc()) {
         $services[] = $srv;
@@ -107,7 +103,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'show_services' && isset($_GET
     $servicesResult->free();
 }
 
-// Rezervācijas apstrāde ar papildu validāciju
+// Rezervācijas apstrāde
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'book_service') {
     $serviceId = (int)$_POST['service_id'];
     $selectedSlot = $_POST['slot'];
@@ -142,14 +138,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $checkStmt->close();
 
     if ($count > 0) {
-        $_SESSION['booking_message'] = "Šis laika slots jau ir aizņemts vai pārklājas ar citu rezervāciju!";
+        $_SESSION['booking_message'] = "Šis laika slots jau ir aizņemts!";
     } else {
         $stmt = $conn->prepare("INSERT INTO bookings (service_id, time_slot, booking_date, user_name, phone, user_id) VALUES (?, ?, ?, ?, ?, ?)");
         $stmt->bind_param("issssi", $serviceId, $selectedSlot, $bookingDate, $userName, $phone, $userId);
         if ($stmt->execute()) {
             $_SESSION['booking_message'] = "Rezervācija veiksmīga!";
         } else {
-            $_SESSION['booking_message'] = "Rezervācijas saglabāšana neizdevās: " . $stmt->error;
+            $_SESSION['booking_message'] = "Rezervācijas kļūda: " . $stmt->error;
         }
         $stmt->close();
     }
@@ -165,35 +161,46 @@ if (isset($_GET['action']) && $_GET['action'] === 'cancel_booking' && isset($_GE
     $stmt = $conn->prepare("DELETE FROM bookings WHERE id = ? AND user_id = ?");
     $stmt->bind_param("ii", $bookingId, $userId);
     if ($stmt->execute()) {
-        if ($stmt->affected_rows > 0) {
-            $_SESSION['booking_message'] = "Rezervācija veiksmīgi atcelta!";
-        } else {
-            $_SESSION['booking_message'] = "Rezervācija netika atrasta vai jums nav tiesību to atcelt!";
-        }
+        $_SESSION['booking_message'] = $stmt->affected_rows > 0 ? "Rezervācija atcelta!" : "Rezervācija netika atrasta!";
     } else {
-        $_SESSION['booking_message'] = "Kļūda atceļot rezervāciju: " . $stmt->error;
+        $_SESSION['booking_message'] = "Kļūda: " . $stmt->error;
     }
     $stmt->close();
     header("Location: index.php?selected_date=" . urlencode($selectedDate));
     exit;
 }
-
-include '../includes/header.php';
 ?>
-<div class="container">
-    <a href="../logout.php" class="logout-link">Izlogoties</a>
-</div>
-
-<?php if (isset($_SESSION['booking_message'])): ?>
-    <div class="message">
-        <?php echo htmlspecialchars($_SESSION['booking_message']); unset($_SESSION['booking_message']); ?>
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+    <meta charset="UTF-8">
+    <title>MR ONLAINS Calendar</title>
+    <link rel="stylesheet" href="../css/base.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="../css/calendar.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="../css/timeslots.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="../css/procedures.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="../css/bookings.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="../css/admin.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+    <?php include '../includes/header.php'; ?>
+    <div class="container">
+        <div class="user-options">
+            <a href="../logout.php" class="logout-link"><i class="fas fa-sign-out-alt"></i> Izlogoties</a>
+        </div>
     </div>
-<?php endif; ?>
 
-<?php include '../includes/calendar.php'; ?>
-<?php include '../includes/timeslots.php'; ?>
-<?php include '../includes/procedures.php'; ?>
-<?php include '../includes/bookings.php'; ?>
-<?php include '../includes/footer.php'; ?>
+    <?php if (isset($_SESSION['booking_message'])): ?>
+        <div class="message">
+            <?php echo htmlspecialchars($_SESSION['booking_message']); unset($_SESSION['booking_message']); ?>
+        </div>
+    <?php endif; ?>
+
+    <?php include '../includes/calendar.php'; ?>
+    <?php include '../includes/timeslots.php'; ?>
+    <?php include '../includes/procedures.php'; ?>
+    <?php include '../includes/bookings.php'; ?>
+    <?php include '../includes/footer.php'; ?>
 </body>
 </html>

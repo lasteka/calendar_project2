@@ -25,35 +25,38 @@ calendar_project/
 └── README.md                 # Projekta dokumentācija
 
 # Calendar Project
-calendar_project/
-├── css/
-│   ├── admin.css        ← Stili admin paneļa lapām (index.php, edit.php, login.php)
-│   ├── base.css        ← Vispārējie stili visam projektam
-│   ├── calendar.css    ← Kalendāra stili (public/index.php)
-│   ├── timeslots.css   ← Laika slotu stili (public/index.php)
-│   ├── procedures.css  ← Procedūru stili (public/index.php)
-│   ├── bookings.css    ← Rezervāciju stili (public/index.php)
-├── includes/
-│   ├── header.php      ← Galvenes saturs (<header> bez <html>, <head>, <body>)
-│   ├── timeslots.php   ← Laika slotu HTML ģenerēšana
-│   ├── calendar.php    ← Kalendāra HTML (nav sniegts saturs)
-│   ├── procedures.php  ← Procedūru HTML (nav sniegts saturs)
-│   ├── bookings.php    ← Rezervāciju HTML (nav sniegts saturs)
-│   ├── footer.php      ← Kājenes saturs (nav sniegts saturs)
-├── public/
-│   ├── index.php       ← Galvenā lapa (kalendārs, laika sloti, procedūras)
-│   ├── login.php       ← Lietotāju ielogošanās (nav sniegts saturs)
-│   ├── register.php    ← Lietotāju reģistrācija (sniegts)
-│   ├── logout.php      ← Lietotāju izlogošanās (sniegts)
+calendar_project/project_root/
 ├── admin/
-│   ├── index.php       ← Admin panelis (rezervāciju saraksts)
-│   ├── edit.php        ← Rezervāciju rediģēšana
-│   ├── login.php       ← Admin ielogošanās
-│   ├── logout.php      ← Admin izlogošanās
+│   ├── index.php         // Admin paneļa galvenā lapa (rezervāciju saraksts)
+│   ├── login.php         // Admin ielogošanās lapa
+│   ├── edit.php          // Rezervāciju rediģēšanas lapa
+│
 ├── config/
-│   ├── db_connection.php ← Datubāzes savienojums (nav sniegts saturs)
-├── middleware.php         ← Vidusprogrammatūra (sesiju pārbaude, nav sniegts saturs)
-├── middleware.php         ← Vidusprogrammatūra (piemēram, sesiju pārbaude)
+│   ├── db_connection.php // Datubāzes savienojums (MySQL)
+│
+├── css/
+│   ├── base.css          // Vispārējie stili (visām lapām)
+│   ├── admin.css         // Admin paneļa un formu stili (login, register, edit)
+│   ├── calendar.css      // Kalendāra stili (public/index.php)
+│   ├── timeslots.css     // Laika slotu stili (public/index.php)
+│   ├── procedures.css    // Pakalpojumu izvēles stili (public/index.php)
+│   ├── bookings.css      // Rezervāciju saraksta stili (public/index.php)
+│
+├── includes/
+│   ├── header.php        // Kopējais galvenes fails (navigācija, logo?)
+│   ├── footer.php        // Kopējais kājenes fails
+│   ├── calendar.php      // Kalendāra HTML/PHP (public/index.php)
+│   ├── timeslots.php     // Laika slotu HTML/PHP (public/index.php)
+│   ├── procedures.php    // Pakalpojumu izvēles HTML/PHP (public/index.php)
+│   ├── bookings.php      // Lietotāja rezervāciju saraksts (public/index.php)
+│
+├── public/
+│   ├── index.php         // Publiskā galvenā lapa (kalendārs, rezervācijas)
+│   ├── login.php         // Publiskā ielogošanās lapa
+│   ├── register.php      // Reģistrācijas lapa (ar ielogošanās formu pēc veiksmes)
+│
+├── middleware.php        // Sesiju un autentifikācijas pārbaude
+├── logout.php            // Izlogošanās loģika (dzēš sesiju, novirza uz login)
 Šis projekts ir rezervāciju sistēma ar kalendāru, kas izmanto PHP, HTML, CSS un SQL. Projekta struktūra atdalīta starp publisko (klienta) pusi un administratīvo daļu.
 
 ## Struktūra

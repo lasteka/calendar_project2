@@ -14,17 +14,53 @@ h1 {
     text-align: center;
 }
 
+/* Lietotāja opcijas */
+.user-options {
+    text-align: right;
+    margin-bottom: 20px;
+}
+
+/* Darbību saite (piem., pievienot pakalpojumu) */
+.action-link {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #28a745;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s, transform 0.2s;
+    margin-right: 10px;
+}
+
+.action-link:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+}
+
+.action-link i {
+    margin-right: 5px;
+}
+
 /* Izlogoties saite */
 .logout-link {
     display: inline-block;
-    margin-bottom: 20px;
-    color: #007bff;
+    padding: 8px 16px;
+    background-color: #dc3545;
+    color: white;
+    border-radius: 4px;
     text-decoration: none;
     font-weight: bold;
+    transition: background-color 0.3s, transform 0.2s;
 }
 
 .logout-link:hover {
-    text-decoration: underline;
+    background-color: #c82333;
+    transform: translateY(-2px);
+}
+
+.logout-link i {
+    margin-right: 5px;
 }
 
 /* Tabula rezervāciju sarakstam */
@@ -67,7 +103,7 @@ h1 {
     text-decoration: underline;
 }
 
-/* Formas stili (edit.php, login.php, register.php) */
+/* Formas stili (edit.php, login.php, register.php, add_service.php) */
 .form-group {
     margin-bottom: 20px;
 }
@@ -160,5 +196,14 @@ button:hover {
     button {
         width: 100%;
         padding: 12px;
+    }
+
+    .user-options {
+        text-align: center;
+    }
+
+    .action-link {
+        margin-right: 0;
+        margin-bottom: 10px;
     }
 }

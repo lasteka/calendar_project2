@@ -10,7 +10,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     exit;
 }
 
-// Iegūstam visus rezervāciju ierakstus ar pakalpojumu nosaukumiem un lietotāju e-pastiem
+// Iegūstam visus rezervāciju ierakstus
 $result = $conn->query("
     SELECT b.*, s.name AS service_name, u.email AS user_email 
     FROM bookings b 
@@ -26,13 +26,16 @@ $result = $conn->query("
     <title>Admin Panelis – Rezervācijas</title>
     <link rel="stylesheet" href="../css/base.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="../css/admin.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
     <?php include '../includes/header.php'; ?>
-
     <div class="container">
         <h1>Visas rezervācijas</h1>
-        <a href="../logout.php">Izlogoties</a>
+        <div class="user-options">
+            <a href="add_service.php" class="action-link"><i class="fas fa-plus"></i> Pievienot Pakalpojumu</a>
+            <a href="../logout.php" class="logout-link"><i class="fas fa-sign-out-alt"></i> Izlogoties</a>
+        </div>
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -62,7 +65,6 @@ $result = $conn->query("
             </tbody>
         </table>
     </div>
-
     <?php include '../includes/footer.php'; ?>
 </body>
 </html>
