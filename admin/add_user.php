@@ -1,10 +1,20 @@
 <?php
+// Iekļaujam middleware un datubāzes savienojumu
+require_once '../middleware.php';
+runMiddleware();
+
 require_once '../config/db_connection.php';
 
-$message = '';
-$show_login_form = false;
+// Pārbaudām, vai lietotājs ir administrators
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    header("Location: login.php");
+    exit;
+}
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
+// Ziņojuma mainīgais
+$message = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Iegūstam datus
     $username = trim($_POST['username'] ?? '');
     $email = trim($_POST['email'] ?? '');
@@ -39,10 +49,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
             $stmt = $conn->prepare("INSERT INTO users (username, email, password, name, phone) VALUES (?, ?, ?, ?, ?)");
             $stmt->bind_param("sssss", $username, $email, $hashed_password, $name, $phone);
             if ($stmt->execute()) {
-                $message = "Reģistrācija veiksmīga! Lūdzu, ielogojieties.";
-                $show_login_form = true;
+                $message = "Lietotājs veiksmīgi pievienots!";
             } else {
-                $message = "Reģistrācijas kļūda: " . $stmt->error;
+                $message = "Kļūda pievienojot lietotāju: " . $stmt->error;
             }
         }
         $stmt->close();
@@ -53,59 +62,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
 <html lang="lv">
 <head>
     <meta charset="UTF-8">
-    <title>Reģistrācija</title>
+    <title>Pievienot Lietotāju</title>
     <link rel="stylesheet" href="../css/base.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="../css/admin.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <?php include '../includes/header.php'; ?>
     <div class="container">
-        <h1>Reģistrācija</h1>
+        <h1>Pievienot Jaunu Lietotāju</h1>
+        <div class="user-options">
+            <a href="index.php" class="action-link"><i class="fas fa-list"></i> Atpakaļ uz Rezervācijām</a>
+            <a href="../logout.php" class="logout-link"><i class="fas fa-sign-out-alt"></i> Izlogoties</a>
+        </div>
         <?php if ($message): ?>
             <div class="message">
                 <?php echo htmlspecialchars($message); ?>
             </div>
         <?php endif; ?>
-        <?php if ($show_login_form): ?>
-            <h2>Ielogoties</h2>
-            <form method="POST" action="login.php">
-                <div class="form-group">
-                    <label for="email">E-pasts:</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Parole:</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                <button type="submit">Ielogoties</button>
-            </form>
-        <?php else: ?>
-            <form method="POST" action="register.php">
-                <input type="hidden" name="register" value="1">
-                <div class="form-group">
-                    <label for="username">Lietotājvārds:</label>
-                    <input type="text" id="username" name="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">E-pasts:</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Parole:</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                <div class="form-group">
-                    <label for="name">Vārds:</label>
-                    <input type="text" id="name" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label for="phone">Telefona numurs:</label>
-                    <input type="text" id="phone" name="phone" required placeholder="+371 12345678">
-                </div>
-                <button type="submit">Reģistrēties</button>
-            </form>
-            <p>Jau ir konts? <a href="login.php">Ielogojieties</a></p>
-        <?php endif; ?>
+        <form method="POST" action="add_user.php">
+            <div class="form-group">
+                <label for="username">Lietotājvārds:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="email">E-pasts:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Parole:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="name">Vārds:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Telefona numurs:</label>
+                <input type="text" id="phone" name="phone" required placeholder="+371 12345678">
+            </div>
+            <button type="submit">Pievienot Lietotāju</button>
+        </form>
+        <p><a href="index.php">Atpakaļ uz rezervācijām</a></p>
     </div>
     <?php include '../includes/footer.php'; ?>
 </body>

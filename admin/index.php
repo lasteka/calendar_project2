@@ -12,7 +12,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 
 // Iegūstam visus rezervāciju ierakstus
 $result = $conn->query("
-    SELECT b.*, s.name AS service_name, u.email AS user_email 
+    SELECT b.*, s.name AS service_name, u.email AS user_email, u.name AS user_name, u.phone AS user_phone
     FROM bookings b 
     LEFT JOIN services s ON b.service_id = s.id 
     LEFT JOIN users u ON b.user_id = u.id 
@@ -34,6 +34,8 @@ $result = $conn->query("
         <h1>Visas rezervācijas</h1>
         <div class="user-options">
             <a href="add_service.php" class="action-link"><i class="fas fa-plus"></i> Pievienot Pakalpojumu</a>
+            <a href="services.php" class="action-link"><i class="fas fa-cogs"></i> Pārvaldīt Pakalpojumus</a>
+            <a href="add_user.php" class="action-link"><i class="fas fa-user-plus"></i> Pievienot Lietotāju</a>
             <a href="../logout.php" class="logout-link"><i class="fas fa-sign-out-alt"></i> Izlogoties</a>
         </div>
         <table class="table table-striped">
@@ -57,7 +59,7 @@ $result = $conn->query("
                         <td><?= $row['booking_date']; ?></td>
                         <td><?= $row['time_slot']; ?></td>
                         <td><?= htmlspecialchars($row['user_name']); ?></td>
-                        <td><?= htmlspecialchars($row['phone']); ?></td>
+                        <td><?= htmlspecialchars($row['user_phone']); ?></td>
                         <td><?= htmlspecialchars($row['user_email']); ?></td>
                         <td><a href="edit.php?id=<?= $row['id']; ?>">Rediģēt</a></td>
                     </tr>

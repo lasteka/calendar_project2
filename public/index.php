@@ -10,6 +10,14 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// Iegūstam lietotāja datus
+$user_id = (int)$_SESSION['user_id'];
+$stmt = $conn->prepare("SELECT name, phone FROM users WHERE id = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$user = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
 $selectedDate = isset($_GET['selected_date']) ? $_GET['selected_date'] : date('Y-m-d');
 
 // Kalendāra aprēķini
@@ -107,9 +115,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'show_services' && isset($_GET
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'book_service') {
     $serviceId = (int)$_POST['service_id'];
     $selectedSlot = $_POST['slot'];
-    $userName = $_POST['user_name'];
-    $phone = $_POST['phone'];
     $bookingDate = $_POST['booking_date'];
+    $userName = $user['name'];
+    $phone = $user['phone'];
     $userId = (int)$_SESSION['user_id'];
 
     $stmt = $conn->prepare("SELECT duration FROM services WHERE id = ?");
