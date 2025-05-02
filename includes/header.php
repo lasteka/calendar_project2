@@ -12,5 +12,5 @@
 <body>
     <header>
         <h1>MR ONLAINS</h1>
-        <p>Procedūras: Izvēlētais datums: <?php echo htmlspecialchars($selectedDate); ?></p>
+        <p>Procedūras: Izvēlētais datums: <?php echo isset($selected_date) ? htmlspecialchars($selected_date) : date('Y-m-d'); ?></p>
     </header>

@@ -1,6 +1,8 @@
 <?php
-// Sākam sesiju
-session_start();
+// Sākam sesiju, ja tā vēl nav aktīva
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 function runMiddleware() {
     // Žurnāla ieraksts: saglabājam pieprasījuma laiku un URI

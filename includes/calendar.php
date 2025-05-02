@@ -1,3 +1,18 @@
+<?php
+// Definējam kalendāra mainīgos
+$month = isset($_GET['month']) ? (int)$_GET['month'] : date('n');
+$year = isset($_GET['year']) ? (int)$_GET['year'] : date('Y');
+$selectedDate = isset($_GET['selected_date']) ? $_GET['selected_date'] : date('Y-m-d');
+
+// Aprēķinām kalendāra datus
+$monthName = date('F', mktime(0, 0, 0, $month, 1, $year));
+$daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+$firstDayOfWeek = date('w', mktime(0, 0, 0, $month, 1, $year));
+$prevMonth = ($month == 1) ? 12 : $month - 1;
+$prevYear = ($month == 1) ? $year - 1 : $year;
+$nextMonth = ($month == 12) ? 1 : $month + 1;
+$nextYear = ($month == 12) ? $year + 1 : $year;
+?>
 <div class="calendar-container">
     <h2><?php echo $monthName . " " . $year; ?></h2>
     <div class="month-navigation">
