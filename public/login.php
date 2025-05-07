@@ -36,24 +36,24 @@ try {
 
     $loginError = '';
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $email = trim($_POST['email'] ?? '');
+        // Normalizējam e-pastu (mazie burti, noņemam atstarpes)
+        $email = trim(strtolower($_POST['email'] ?? ''));
         $password = $_POST['password'] ?? '';
 
-        // Žurnalējam mēģinājumu
-        error_log("Login attempt: email=$email");
+        // Žurnalējam mēģinājumu un e-pasta HEX reprezentāciju
+        $email_hex = bin2hex($email);
+        error_log("Login attempt: email=$email, email_hex=$email_hex");
 
         // Pārbaudām admins tabulu
-        $stmt = $conn->prepare("SELECT id, password FROM admins WHERE email = ?");
-        if (!$stmt) {
-            error_log("SQL prepare failed (admins): " . $conn->error);
-            die("SQL kļūda: " . $conn->error);
-        }
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($admin = $result->fetch_assoc()) {
-            error_log("Admin email found: email=$email, password_hash=" . $admin['password']);
-            if (password_verify($password, $admin['password'])) {
+        $stmt = $pdo->prepare("SELECT id, email, password, HEX(email) AS email_hex FROM admins WHERE email = ?");
+        $stmt->execute([$email]);
+        $admin = $stmt->fetch();
+        if ($admin) {
+            error_log("Admin email found: email=" . $admin['email'] . ", email_hex=" . $admin['email_hex'] . ", password_hash=" . $admin['password']);
+            if (strlen($admin['password']) < 60) {
+                error_log("Invalid password hash length for admin: email=$email, length=" . strlen($admin['password']));
+                $loginError = "Kļūda: Nederīgs paroles formāts!";
+            } elseif (password_verify($password, $admin['password'])) {
                 $_SESSION['admin_id'] = $admin['id'];
                 error_log("Admin login successful: admin_id=" . $admin['id']);
                 header("Location: ../admin/index.php");
@@ -65,17 +65,15 @@ try {
         } else {
             // Pārbaudām users tabulu
             error_log("Admin email not found: email=$email, checking users table");
-            $stmt = $conn->prepare("SELECT id, password FROM users WHERE email = ?");
-            if (!$stmt) {
-                error_log("SQL prepare failed (users): " . $conn->error);
-                die("SQL kļūda: " . $conn->error);
-            }
-            $stmt->bind_param("s", $email);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            if ($user = $result->fetch_assoc()) {
-                error_log("User email found: email=$email, password_hash=" . $user['password']);
-                if (password_verify($password, $user['password'])) {
+            $stmt = $pdo->prepare("SELECT id, email, password, HEX(email) AS email_hex FROM users WHERE email = ?");
+            $stmt->execute([$email]);
+            $user = $stmt->fetch();
+            if ($user) {
+                error_log("User email found: email=" . $user['email'] . ", email_hex=" . $user['email_hex'] . ", password_hash=" . $user['password']);
+                if (strlen($user['password']) < 60) {
+                    error_log("Invalid password hash length for user: email=$email, length=" . strlen($user['password']));
+                    $loginError = "Kļūda: Nederīgs paroles formāts!";
+                } elseif (password_verify($password, $user['password'])) {
                     $_SESSION['user_id'] = $user['id'];
                     error_log("User login successful: user_id=" . $user['id']);
                     header("Location: index.php");
@@ -89,11 +87,10 @@ try {
                 error_log("Login failed: email=$email not found in admins or users");
             }
         }
-        $stmt->close();
     }
 } catch (Exception $e) {
     error_log("Exception in login.php: " . $e->getMessage() . " at " . __FILE__ . ":" . __LINE__);
-    die("Kļūda: " . $e->getMessage());
+    $loginError = "Kļūda: " . $e->getMessage();
 }
 ?>
 <!DOCTYPE html>
@@ -102,21 +99,21 @@ try {
     <meta charset="UTF-8">
     <title>Ielogoties</title>
     <link rel="stylesheet" href="../css/base.css?v=<?php echo time(); ?>">
-    <link rel="stylesheet" href="../css/admin.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="../css/public.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <?php include '../includes/header.php'; ?>
     <div class="container">
         <h1>Ielogoties</h1>
         <?php if ($loginError): ?>
-            <div class="message" style="color: red;">
+            <div class="message error">
                 <?php echo htmlspecialchars($loginError); ?>
             </div>
         <?php endif; ?>
         <form method="POST" action="login.php">
             <div class="form-group">
                 <label for="email">E-pasts:</label>
-                <input type="email" id="email" name="email" required>
+                <input type="email" id="email" name="email" required value="<?php echo isset($email) ? htmlspecialchars($email) : ''; ?>">
             </div>
             <div class="form-group">
                 <label for="password">Parole:</label>
@@ -129,4 +126,3 @@ try {
     <?php include '../includes/footer.php'; ?>
 </body>
 </html>
-<?php $conn->close(); ?>

@@ -1,9 +1,14 @@
-/* Admin paneļa vispārējais izkārtojums */
-.container {
+/* Admin paneļa un publisko lapu vispārējais izkārtojums */
+div.container {
     max-width: 600px;
     width: 100%;
     margin: 50px auto;
     padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    display: block;
 }
 
 /* Virsraksti */
@@ -12,6 +17,12 @@ h1 {
     color: #333;
     margin-bottom: 20px;
     text-align: center;
+}
+
+h2 {
+    font-size: 1.4rem;
+    color: #333;
+    margin-bottom: 15px;
 }
 
 /* Lietotāja opcijas */
@@ -63,14 +74,16 @@ h1 {
     margin-right: 5px;
 }
 
-/* Tabula rezervāciju sarakstam */
-.table {
+/* Tabula rezervāciju un pakalpojumu sarakstam */
+table.table {
     width: 100%;
+    max-width: 600px;
+    margin: 0 auto 50px auto;
     border-collapse: collapse;
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    margin-bottom: 50px;
+    display: block;
 }
 
 .table th,
@@ -95,7 +108,7 @@ h1 {
 }
 
 .table a {
-    color: #007bff;
+    color: #d400ff;
     text-decoration: none;
 }
 
@@ -103,9 +116,10 @@ h1 {
     text-decoration: underline;
 }
 
-/* Formas stili (edit.php, login.php, register.php, add_service.php) */
-.form-group {
+/* Formas stili (edit.php, login.php, register.php, add_service.php, book.php, add_user.php) */
+div.form-group {
     margin-bottom: 20px;
+    text-align: left;
 }
 
 .form-group label {
@@ -118,11 +132,14 @@ h1 {
 .form-group input,
 .form-group select {
     width: 100%;
-    padding: 8px 12px;
+    max-width: 520px;
+    padding: 10px 12px;
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 1rem;
     box-sizing: border-box;
+    display: block;
+    margin: 0 auto;
 }
 
 .form-group input[readonly] {
@@ -137,25 +154,27 @@ h1 {
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+    border-color: #d400ff;
+    box-shadow: 0 0 5px rgba(212, 0, 255, 0.3);
 }
 
 /* Pogas */
 button {
-    background-color: #007bff;
+    background-color: #d400ff !important;
     color: #fff;
     padding: 12px 20px;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
     font-size: 1rem;
     font-weight: bold;
     transition: background-color 0.2s;
+    display: block;
+    margin: 0 auto;
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: #501054 !important;
 }
 
 /* Ziņojumu stili */
@@ -165,28 +184,82 @@ button:hover {
     border-radius: 4px;
     font-size: 0.95rem;
     text-align: center;
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.message[style*="color: red"] {
+.message[style*="color: red"], .message.error {
     background-color: #f8d7da;
     color: #721c24;
 }
 
-.message:not([style*="color: red"]) {
+.message:not([style*="color: red"]):not(.error) {
     background-color: #d4edda;
     color: #155724;
 }
 
+/* Laika slotu tabula */
+.timeslots-table {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.timeslots-table th, .timeslots-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.timeslots-table th {
+    background-color: #f2f2f2;
+}
+
+/* Pārslēgšanas poga */
+.toggle-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.toggle-btn:hover {
+    background-color: #45a049;
+}
+
+/* Dzēšanas poga */
+.delete-btn {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.delete-btn:hover {
+    background-color: #da190b;
+}
+
 /* Responsivitāte */
 @media (max-width: 768px) {
-    .container {
+    div.container {
         padding: 15px;
+        margin: 20px auto;
     }
 
     .table th,
     .table td {
         padding: 10px;
         font-size: 0.9rem;
+    }
+
+    table.table, .timeslots-table {
+        max-width: 100%;
+        margin: 0 auto 20px auto;
     }
 
     h1 {
@@ -205,5 +278,11 @@ button:hover {
     .action-link {
         margin-right: 0;
         margin-bottom: 10px;
+    }
+
+    div.form-group input, div.form-group select {
+        padding: 8px 10px;
+        font-size: 0.9rem;
+        max-width: 100%;
     }
 }

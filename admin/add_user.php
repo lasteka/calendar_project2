@@ -1,28 +1,24 @@
 <?php
-// Iekļaujam middleware un datubāzes savienojumu
+session_start();
 require_once '../middleware.php';
 runMiddleware();
-
 require_once '../config/db_connection.php';
 
 // Pārbaudām, vai lietotājs ir administrators
-if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+if (!isset($_SESSION['admin_id'])) {
     header("Location: login.php");
     exit;
 }
 
-// Ziņojuma mainīgais
 $message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Iegūstam datus
     $username = trim($_POST['username'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     $name = trim($_POST['name'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
 
-    // Validējam ievadi
     if (empty($username)) {
         $message = "Lietotājvārds ir obligāts!";
     } elseif (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -34,27 +30,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (empty($phone) || !preg_match("/^(\+?\d{1,4}[-.\s]?)?\d{8,}$/", $phone)) {
         $message = "Norādiet derīgu telefona numuru (vismaz 8 cipari)!";
     } else {
-        // Pārbaudām, vai lietotājvārds vai e-pasts jau eksistē
-        $stmt = $conn->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
-        $stmt->bind_param("ss", $username, $email);
-        $stmt->execute();
-        $stmt->store_result();
-        if ($stmt->num_rows > 0) {
-            $message = "Lietotājvārds vai e-pasts jau ir reģistrēts!";
-        } else {
-            // Šifrējam paroli
-            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
-            // Pievienojam lietotāju
-            $stmt = $conn->prepare("INSERT INTO users (username, email, password, name, phone) VALUES (?, ?, ?, ?, ?)");
-            $stmt->bind_param("sssss", $username, $email, $hashed_password, $name, $phone);
-            if ($stmt->execute()) {
-                $message = "Lietotājs veiksmīgi pievienots!";
+        try {
+            $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
+            $stmt->execute([$username, $email]);
+            if ($stmt->fetch()) {
+                $message = "Lietotājvārds vai e-pasts jau ir reģistrēts!";
             } else {
-                $message = "Kļūda pievienojot lietotāju: " . $stmt->error;
+                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                $stmt = $pdo->prepare("INSERT INTO users (username, email, password, name, phone) VALUES (?, ?, ?, ?, ?)");
+                if ($stmt->execute([$username, $email, $hashed_password, $name, $phone])) {
+                    $message = "Lietotājs veiksmīgi pievienots!";
+                } else {
+                    $message = "Kļūda pievienojot lietotāju!";
+                }
             }
+        } catch (PDOException $e) {
+            $message = "Kļūda: " . $e->getMessage();
         }
-        $stmt->close();
     }
 }
 ?>
@@ -65,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Pievienot Lietotāju</title>
     <link rel="stylesheet" href="../css/base.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="../css/admin.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
     <?php include '../includes/header.php'; ?>

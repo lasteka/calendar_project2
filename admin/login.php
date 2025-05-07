@@ -1,25 +1,34 @@
 <?php
+session_start();
 require_once '../middleware.php';
 runMiddleware();
+require_once '../config/db_connection.php';
 
-// Pārbaudām, vai lietotājs jau ir ielogojies
-if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+// Pārbaudām, vai administrators jau ir ielogojies
+if (isset($_SESSION['admin_id'])) {
     header("Location: index.php");
     exit;
 }
 
-// Vienkārša paroles pārbaude (šeit izmantojam statisku paroli, bet reālā sistēmā jāizmanto datubāze)
-$correctPassword = "admin123"; // Pielāgo pēc vajadzības
 $loginError = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
-    if ($password === $correctPassword) {
-        $_SESSION['logged_in'] = true;
-        header("Location: index.php");
-        exit;
-    } else {
-        $loginError = "Nepareiza parole!";
+
+    try {
+        $stmt = $pdo->prepare("SELECT id, password FROM admins WHERE email = ?");
+        $stmt->execute([$email]);
+        $admin = $stmt->fetch();
+        if ($admin && password_verify($password, $admin['password'])) {
+            $_SESSION['admin_id'] = $admin['id'];
+            header("Location: index.php");
+            exit;
+        } else {
+            $loginError = "Nepareizs e-pasts vai parole!";
+        }
+    } catch (PDOException $e) {
+        $loginError = "Kļūda: " . $e->getMessage();
     }
 }
 ?>
@@ -40,6 +49,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
         <form method="POST" action="login.php">
+            <div class="form-group">
+                <label for="email">E-pasts:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
             <div class="form-group">
                 <label for="password">Parole:</label>
                 <input type="password" id="password" name="password" required>

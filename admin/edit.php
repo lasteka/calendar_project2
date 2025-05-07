@@ -1,11 +1,11 @@
 <?php
+session_start();
 require_once '../middleware.php';
 runMiddleware();
-
 require_once '../config/db_connection.php';
 
-// Pārbaudām, vai lietotājs ir ielogojies
-if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+// Pārbaudām, vai lietotājs ir administrators
+if (!isset($_SESSION['admin_id'])) {
     header("Location: login.php");
     exit;
 }
@@ -18,54 +18,51 @@ if (!isset($_GET['id'])) {
 
 $bookingId = (int)$_GET['id'];
 
-// Apstrādājam formu, ja tā tika iesniegta
+// Apstrādājam formu
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_booking') {
-    $serviceId   = (int)$_POST['service_id'];
+    $serviceId = (int)$_POST['service_id'];
     $bookingDate = $_POST['booking_date'];
-    $timeSlot    = $_POST['time_slot'];
-    $userName    = $_POST['user_name'];
-    $phone       = $_POST['phone'];
+    $timeSlot = $_POST['time_slot'];
+    $userName = $_POST['user_name'];
+    $phone = $_POST['phone'];
 
-    $stmt = $conn->prepare("UPDATE bookings SET service_id = ?, booking_date = ?, time_slot = ?, user_name = ?, phone = ? WHERE id = ?");
-    $stmt->bind_param("issssi", $serviceId, $bookingDate, $timeSlot, $userName, $phone, $bookingId);
-
-    if ($stmt->execute()) {
-        $_SESSION['message'] = "Rezervācija veiksmīgi atjaunināta!";
-    } else {
-        $_SESSION['message'] = "Kļūda atjauninot rezervāciju: " . $stmt->error;
+    try {
+        $stmt = $pdo->prepare("UPDATE bookings SET service_id = ?, booking_date = ?, time_slot = ?, user_name = ?, phone = ? WHERE id = ?");
+        if ($stmt->execute([$serviceId, $bookingDate, $timeSlot, $userName, $phone, $bookingId])) {
+            $_SESSION['message'] = "Rezervācija veiksmīgi atjaunināta!";
+        } else {
+            $_SESSION['message'] = "Kļūda atjauninot rezervāciju!";
+        }
+    } catch (PDOException $e) {
+        $_SESSION['message'] = "Kļūda: " . $e->getMessage();
     }
-    $stmt->close();
     header("Location: index.php");
     exit;
 }
 
-// Ielādējam rezervācijas datus ar pakalpojuma nosaukumu un lietotāja e-pastu
-$stmt = $conn->prepare("
-    SELECT b.*, s.name AS service_name, u.email AS user_email 
-    FROM bookings b 
-    LEFT JOIN services s ON b.service_id = s.id 
-    LEFT JOIN users u ON b.user_id = u.id 
-    WHERE b.id = ?
-");
-$stmt->bind_param("i", $bookingId);
-$stmt->execute();
-$result = $stmt->get_result();
-$booking = $result->fetch_assoc();
-$stmt->close();
+// Ielādējam rezervācijas datus
+try {
+    $stmt = $pdo->prepare("
+        SELECT b.*, s.name AS service_name, u.email AS user_email 
+        FROM bookings b 
+        LEFT JOIN services s ON b.service_id = s.id 
+        LEFT JOIN users u ON b.user_id = u.id 
+        WHERE b.id = ?
+    ");
+    $stmt->execute([$bookingId]);
+    $booking = $stmt->fetch();
+    if (!$booking) {
+        echo "Rezervācija ar ID {$bookingId} netika atrasta.";
+        exit;
+    }
 
-if (!$booking) {
-    echo "Rezervācija ar ID {$bookingId} netika atrasta.";
+    // Ielādējam pakalpojumus
+    $stmt = $pdo->query("SELECT id, name FROM services ORDER BY name");
+    $services = $stmt->fetchAll();
+} catch (PDOException $e) {
+    echo "Kļūda: " . $e->getMessage();
     exit;
 }
-
-// Ielādējam visus pakalpojumus, lai izveidotu izvēles lauku
-$servicesQuery = "SELECT id, name FROM services ORDER BY name";
-$servicesResult = $conn->query($servicesQuery);
-$services = [];
-while ($srv = $servicesResult->fetch_assoc()) {
-    $services[] = $srv;
-}
-$servicesResult->free();
 ?>
 <!DOCTYPE html>
 <html lang="lv">
@@ -74,6 +71,7 @@ $servicesResult->free();
     <title>Labot rezervāciju</title>
     <link rel="stylesheet" href="../css/base.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="../css/admin.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
     <?php include '../includes/header.php'; ?>

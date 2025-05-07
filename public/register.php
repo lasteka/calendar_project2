@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once '../config/db_connection.php';
 
 $message = '';
@@ -24,28 +25,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
     } elseif (empty($phone) || !preg_match("/^(\+?\d{1,4}[-.\s]?)?\d{8,}$/", $phone)) {
         $message = "Norādiet derīgu telefona numuru (vismaz 8 cipari)!";
     } else {
-        // Pārbaudām, vai lietotājvārds vai e-pasts jau eksistē
-        $stmt = $conn->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
-        $stmt->bind_param("ss", $username, $email);
-        $stmt->execute();
-        $stmt->store_result();
-        if ($stmt->num_rows > 0) {
-            $message = "Lietotājvārds vai e-pasts jau ir reģistrēts!";
-        } else {
-            // Šifrējam paroli
-            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
-            // Pievienojam lietotāju
-            $stmt = $conn->prepare("INSERT INTO users (username, email, password, name, phone) VALUES (?, ?, ?, ?, ?)");
-            $stmt->bind_param("sssss", $username, $email, $hashed_password, $name, $phone);
-            if ($stmt->execute()) {
-                $message = "Reģistrācija veiksmīga! Lūdzu, ielogojieties.";
-                $show_login_form = true;
+        try {
+            // Pārbaudām, vai lietotājvārds vai e-pasts jau eksistē
+            $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
+            $stmt->execute([$username, $email]);
+            if ($stmt->fetch()) {
+                $message = "Lietotājvārds vai e-pasts jau ir reģistrēts!";
             } else {
-                $message = "Reģistrācijas kļūda: " . $stmt->error;
+                // Šifrējam paroli
+                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+                // Pievienojam lietotāju
+                $stmt = $pdo->prepare("INSERT INTO users (username, email, password, name, phone) VALUES (?, ?, ?, ?, ?)");
+                if ($stmt->execute([$username, $email, $hashed_password, $name, $phone])) {
+                    $message = "Reģistrācija veiksmīga! Lūdzu, ielogojieties.";
+                    $show_login_form = true;
+                } else {
+                    $message = "Reģistrācijas kļūda!";
+                }
             }
+        } catch (PDOException $e) {
+            $message = "Kļūda: " . $e->getMessage();
         }
-        $stmt->close();
     }
 }
 ?>
@@ -55,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
     <meta charset="UTF-8">
     <title>Reģistrācija</title>
     <link rel="stylesheet" href="../css/base.css?v=<?php echo time(); ?>">
-    <link rel="stylesheet" href="../css/admin.css?v=<?php echo time(); ?>">
+<link rel="stylesheet" href="../css/admin.css?v=<?php echo time(); ?>">
 </head>
 <body>
     <?php include '../includes/header.php'; ?>

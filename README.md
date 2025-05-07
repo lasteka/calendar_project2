@@ -91,39 +91,42 @@ ALTER TABLE users
 ADD name VARCHAR(255) DEFAULT '' NOT NULL,
 ADD phone VARCHAR(255) DEFAULT '' NOT NULL;
 calendar_project2/
-├── admin/
-│   ├── index.php         // Rezervāciju saraksts
-│   ├── login.php         // Admin ielogošanās
-│   ├── edit.php          // Rezervāciju rediģēšana
-│   ├── add_service.php   // Jaunu pakalpojumu pievienošana
-│   ├── services.php      // Pakalpojumu pārskats un rediģēšana
-│   ├── add_user.php      // Manuāla klienta reģistrācija
+├── admin/                           # Administrācijas paneļa faili
+│   ├── index.php                    # Rezervāciju saraksts (tabula ar rezervācijām, izmanto .table)
+│   ├── login.php                    # Admin ielogošanās forma (izmanto .form-group, .container)
+│   ├── edit.php                     # Rezervāciju rediģēšanas forma
+│   ├── add_service.php              # Jaunu pakalpojumu pievienošanas forma
+│   ├── services.php                 # Pakalpojumu pārskats un rediģēšana (iespējams, tabula ar pakalpojumiem)
+│   ├── add_user.php                 # Manuāla klienta reģistrācija (līdzīga public/register.php)
+│   ├── create_admin.php             # Admin konta izveide (iespējams, līdzīga add_user.php)
+│   ├── timeslots.php                # Laika slotu pārvaldība (iespējams, tabula vai forma laika slotu pievienošanai/rediģēšanai)
 │
-├── config/
-│   ├── db_connection.php // Datubāzes savienojums
+├── config/                          # Konfigurācijas faili
+│   ├── db_connection.php            # Datubāzes savienojuma iestatījumi (MySQL vai līdzīga DB)
 │
-├── css/
-│   ├── base.css          // Vispārējie stili
-│   ├── admin.css         // Formas, tabulas, pogas
-│   ├── calendar.css      // Kalendāra stili
-│   ├── timeslots.css     // Laika slotu stili
-│   ├── procedures.css    // Pakalpojumu stili
-│   ├── bookings.css      // Rezervāciju stili
+├── css/                             # Stilu faili (saglabāti calendar_project2/css/)
+│   ├── base.css                     # Vispārējie stili (body, .message, button pamatstili)
+│   ├── admin.css                    # Formas (.form-group), tabulas (.table), konteineri (.container)
+│   ├── calendar.css                 # Kalendāra izkārtojuma stili (iespējams, public/index.php)
+│   ├── timeslots.css                # Laika slotu tabulas (.timeslots-table) stili
+│   ├── procedures.css               # Pakalpojumu saraksta (.procedures) stili
+│   ├── bookings.css                 # Rezervāciju lapu stili (iespējams, book.php)
 │
-├── includes/
-│   ├── header.php        // Galvene
-│   ├── footer.php        // Kājene
-│   ├── calendar.php      // Kalendāra fragments
-│   ├── timeslots.php     // Laika slotu fragments
-│   ├── procedures.php    // Pakalpojumu fragments
-│   ├── bookings.php      // Rezervāciju fragments
+├── includes/                        # Kopēji PHP fragmenti
+│   ├── header.php                   # Galvene (HTML <head>, CSS atsauces, navigācija)
+│   ├── footer.php                   # Kājene (HTML <footer>, autortiesības, skripti)
+│   ├── calendar.php                 # Kalendāra fragments (iespējams, kalendāra attēlošana index.php)
+│   ├── timeslots.php                # Laika slotu fragments (laika slotu attēlošana)
+│   ├── procedures.php               # Pakalpojumu fragments (pakalpojumu saraksts)
+│   ├── bookings.php                 # Rezervāciju fragments (rezervāciju attēlošana)
 │
-├── public/
-│   ├── index.php         // Publiskā lapa (kalendārs, rezervācijas)
-│   ├── login.php         // Publiskā ielogošanās
-│   ├── register.php      // Reģistrācija
+├── public/                          # Publiski pieejamās lapas
+│   ├── index.php                    # Galvenā lapa (kalendārs, laika sloti, rezervāciju izvēle)
+│   ├── login.php                    # Publiskā ielogošanās forma
+│   ├── register.php                 # Reģistrācijas forma
+│   ├── book.php                     # Rezervācijas izveides lapa (ietver pakalpojuma izvēles lauku <select>)
 │
-├── middleware.php        // Sesiju pārbaude un žurnalēšana
-├── logout.php            // Izlogošanās
+├── middleware.php                   # Sesiju pārbaude, žurnalēšana, autentifikācijas loģika
+├── logout.php                       # Izlogošanās (sesijas dzēšana)
 ALTER TABLE timeslots
 ADD is_active TINYINT(1) NOT NULL DEFAULT 1;

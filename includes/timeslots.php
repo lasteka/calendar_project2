@@ -1,11 +1,11 @@
 <div class="container">
-    <?php foreach ($timeslots as $dayPart => $slotArray): ?>
+    <?php foreach ($timeslots as $day_part => $slot_array): ?>
         <div class="day-part">
-            <h2><?php echo htmlspecialchars($dayPart); ?></h2>
+            <h2><?php echo htmlspecialchars($day_part); ?></h2>
             <div class="time-slots">
-                <?php foreach ($slotArray as $slot): ?>
+                <?php foreach ($slot_array as $slot): ?>
                     <div class="time-slot">
-                        <a href="?action=show_services&slot=<?php echo urlencode($slot); ?>&month=<?php echo $month; ?>&year=<?php echo $year; ?>&selected_date=<?php echo $selectedDate; ?>">
+                        <a href="?action=show_services&slot=<?php echo urlencode($slot); ?>&month=<?php echo $month; ?>&year=<?php echo $year; ?>&selected_date=<?php echo urlencode($selected_date); ?>&service_id=<?php echo $selected_service_id; ?>">
                             <?php echo htmlspecialchars($slot); ?>
                         </a>
                     </div>

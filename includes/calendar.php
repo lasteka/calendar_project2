@@ -2,7 +2,7 @@
 // Definējam kalendāra mainīgos
 $month = isset($_GET['month']) ? (int)$_GET['month'] : date('n');
 $year = isset($_GET['year']) ? (int)$_GET['year'] : date('Y');
-$selectedDate = isset($_GET['selected_date']) ? $_GET['selected_date'] : date('Y-m-d');
+$selected_date = isset($_GET['selected_date']) ? $_GET['selected_date'] : date('Y-m-d');
 
 // Aprēķinām kalendāra datus
 $monthName = date('F', mktime(0, 0, 0, $month, 1, $year));
@@ -21,8 +21,8 @@ $nextYear = ($month == 12) ? $year + 1 : $year;
             <span class="arrow">▲</span>
         </div>
         <div class="nav-arrows">
-            <a class="prev" href="?month=<?php echo $prevMonth; ?>&year=<?php echo $prevYear; ?>&selected_date=<?php echo $selectedDate; ?>"><</a>
-            <a class="next" href="?month=<?php echo $nextMonth; ?>&year=<?php echo $nextYear; ?>&selected_date=<?php echo $selectedDate; ?>">></a>
+            <a class="prev" href="?month=<?php echo $prevMonth; ?>&year=<?php echo $prevYear; ?>&selected_date=<?php echo urlencode($selected_date); ?>"><</a>
+            <a class="next" href="?month=<?php echo $nextMonth; ?>&year=<?php echo $nextYear; ?>&selected_date=<?php echo urlencode($selected_date); ?>">></a>
         </div>
     </div>
     <table class="calendar">
@@ -39,7 +39,7 @@ $nextYear = ($month == 12) ? $year + 1 : $year;
                 }
                 for ($day = 1; $day <= $daysInMonth; $day++) {
                     $currentDate = "$year-$month-" . sprintf("%02d", $day);
-                    $isSelected = ($currentDate === $selectedDate) ? 'selected' : '';
+                    $isSelected = ($currentDate === $selected_date) ? 'selected' : '';
                     echo "<td class='selectable $isSelected'>";
                     echo "<a href='?selected_date=$currentDate&month=$month&year=$year'>$day</a>";
                     echo "</td>";
@@ -56,9 +56,3 @@ $nextYear = ($month == 12) ? $year + 1 : $year;
         </tbody>
     </table>
 </div>
-
-<?php if (isset($cancelMessage)): ?>
-    <div class="message">
-        <?php echo htmlspecialchars($cancelMessage); ?>
-    </div>
-<?php endif; ?>

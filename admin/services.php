@@ -1,27 +1,23 @@
 <?php
-// Iekļaujam middleware un datubāzes savienojumu
+session_start();
 require_once '../middleware.php';
 runMiddleware();
-
 require_once '../config/db_connection.php';
 
 // Pārbaudām, vai lietotājs ir administrators
-if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+if (!isset($_SESSION['admin_id'])) {
     header("Location: login.php");
     exit;
 }
 
-// Ziņojuma mainīgais
 $message = '';
 
-// Apstrādājam rediģēšanas pieprasījumu
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_service'])) {
     $id = (int)$_POST['id'];
     $name = trim($_POST['name'] ?? '');
     $price = filter_var($_POST['price'] ?? 0, FILTER_VALIDATE_FLOAT);
     $duration = filter_var($_POST['duration'] ?? 0, FILTER_VALIDATE_INT);
 
-    // Validējam ievadi
     if (empty($name)) {
         $message = "Pakalpojuma nosaukums ir obligāts!";
     } elseif ($price === false || $price < 0) {
@@ -29,31 +25,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_service'])) {
     } elseif ($duration === false || $duration <= 0) {
         $message = "Norādiet derīgu ilgumu (pozitīvs skaitlis minūtēs)!";
     } else {
-        // Atjaunojam pakalpojumu
-        $stmt = $conn->prepare("UPDATE services SET name = ?, price = ?, duration = ? WHERE id = ?");
-        $stmt->bind_param("sdii", $name, $price, $duration, $id);
-        if ($stmt->execute()) {
-            $message = "Pakalpojums veiksmīgi atjaunināts!";
-        } else {
-            $message = "Kļūda atjauninot pakalpojumu: " . $stmt->error;
+        try {
+            $stmt = $pdo->prepare("UPDATE services SET name = ?, price = ?, duration = ? WHERE id = ?");
+            if ($stmt->execute([$name, $price, $duration, $id])) {
+                $message = "Pakalpojums veiksmīgi atjaunināts!";
+            } else {
+                $message = "Kļūda atjauninot pakalpojumu!";
+            }
+        } catch (PDOException $e) {
+            $message = "Kļūda: " . $e->getMessage();
         }
-        $stmt->close();
     }
 }
 
-// Ielādējam pakalpojumu rediģēšanai
 $edit_service = null;
 if (isset($_GET['edit'])) {
     $edit_id = (int)$_GET['edit'];
-    $stmt = $conn->prepare("SELECT id, name, price, duration FROM services WHERE id = ?");
-    $stmt->bind_param("i", $edit_id);
-    $stmt->execute();
-    $edit_service = $stmt->get_result()->fetch_assoc();
-    $stmt->close();
+    try {
+        $stmt = $pdo->prepare("SELECT id, name, price, duration FROM services WHERE id = ?");
+        $stmt->execute([$edit_id]);
+        $edit_service = $stmt->fetch();
+    } catch (PDOException $e) {
+        $message = "Kļūda: " . $e->getMessage();
+    }
 }
 
-// Ielādējam visus pakalpojumus
-$result = $conn->query("SELECT id, name, price, duration FROM services ORDER BY name");
+try {
+    $stmt = $pdo->query("SELECT id, name, price, duration FROM services ORDER BY name");
+    $services = $stmt->fetchAll();
+} catch (PDOException $e) {
+    $message = "Kļūda: " . $e->getMessage();
+}
 ?>
 <!DOCTYPE html>
 <html lang="lv">
@@ -71,6 +73,7 @@ $result = $conn->query("SELECT id, name, price, duration FROM services ORDER BY 
         <div class="user-options">
             <a href="add_service.php" class="action-link"><i class="fas fa-plus"></i> Pievienot Pakalpojumu</a>
             <a href="index.php" class="action-link"><i class="fas fa-list"></i> Atpakaļ uz Rezervācijām</a>
+            <a href="timeslots.php" class="action-link"><i class="fas fa-clock"></i> Pārvaldīt Laika Slotus</a>
             <a href="../logout.php" class="logout-link"><i class="fas fa-sign-out-alt"></i> Izlogoties</a>
         </div>
         <?php if ($message): ?>
@@ -89,7 +92,7 @@ $result = $conn->query("SELECT id, name, price, duration FROM services ORDER BY 
                 </tr>
             </thead>
             <tbody>
-                <?php while ($row = $result->fetch_assoc()): ?>
+                <?php foreach ($services as $row): ?>
                     <tr>
                         <td><?= $row['id']; ?></td>
                         <td><?= htmlspecialchars($row['name']); ?></td>
@@ -97,7 +100,7 @@ $result = $conn->query("SELECT id, name, price, duration FROM services ORDER BY 
                         <td><?= $row['duration']; ?></td>
                         <td><a href="services.php?edit=<?= $row['id']; ?>">Rediģēt</a></td>
                     </tr>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
             </tbody>
         </table>
         <?php if ($edit_service): ?>

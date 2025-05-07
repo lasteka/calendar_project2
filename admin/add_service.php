@@ -1,26 +1,22 @@
 <?php
-// Iekļaujam middleware un datubāzes savienojumu
+session_start();
 require_once '../middleware.php';
 runMiddleware();
-
 require_once '../config/db_connection.php';
 
 // Pārbaudām, vai lietotājs ir administrators
-if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+if (!isset($_SESSION['admin_id'])) {
     header("Location: login.php");
     exit;
 }
 
-// Ziņojuma mainīgais
 $message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Iegūstam datus no formas
     $name = trim($_POST['name'] ?? '');
     $price = filter_var($_POST['price'] ?? 0, FILTER_VALIDATE_FLOAT);
     $duration = filter_var($_POST['duration'] ?? 0, FILTER_VALIDATE_INT);
 
-    // Validējam ievadi
     if (empty($name)) {
         $message = "Pakalpojuma nosaukums ir obligāts!";
     } elseif ($price === false || $price < 0) {
@@ -28,17 +24,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($duration === false || $duration <= 0) {
         $message = "Norādiet derīgu ilgumu (pozitīvs skaitlis minūtēs)!";
     } else {
-        // Sagatavojam SQL vaicājumu
-        $stmt = $conn->prepare("INSERT INTO services (name, price, duration) VALUES (?, ?, ?)");
-        $stmt->bind_param("sdi", $name, $price, $duration);
-
-        // Izpildām vaicājumu
-        if ($stmt->execute()) {
-            $message = "Pakalpojums veiksmīgi pievienots!";
-        } else {
-            $message = "Kļūda pievienojot pakalpojumu: " . $stmt->error;
+        try {
+            $stmt = $pdo->prepare("INSERT INTO services (name, price, duration) VALUES (?, ?, ?)");
+            if ($stmt->execute([$name, $price, $duration])) {
+                $message = "Pakalpojums veiksmīgi pievienots!";
+            } else {
+                $message = "Kļūda pievienojot pakalpojumu!";
+            }
+        } catch (PDOException $e) {
+            $message = "Kļūda: " . $e->getMessage();
         }
-        $stmt->close();
     }
 }
 ?>
@@ -49,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Pievienot Pakalpojumu</title>
     <link rel="stylesheet" href="../css/base.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="../css/admin.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
     <?php include '../includes/header.php'; ?>
