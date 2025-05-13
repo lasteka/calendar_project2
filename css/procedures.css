@@ -1,32 +1,54 @@
-/* Procedūru saraksts */
 .procedures {
-    background: #fff;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    width: 520px;
-    text-align: left;
-  }
-  
-  .procedures h2 {
-    margin-bottom: 10px;
-  }
-  
-  .procedure {
-    border-bottom: 1px solid #ddd;
-    padding: 10px 0;
-  }
-  
-  .procedure:last-child {
-    border-bottom: none;
-  }
-  
-  .procedure-name {
-    font-weight: bold;
-    margin-bottom: 5px;
-  }
-  
-  .procedure-price {
-    color: #555;
-  }
+  background: #fff;
+  border-radius: var(--border-radius);
+  padding: var(--padding);
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+  max-width: var(--container-width, 600px);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.procedure {
+  display: flex;
+  align-items: flex-start;
+  border: 2px solid #ccc;
+  border-radius: var(--border-radius);
+  padding: 12px 15px;
+  cursor: pointer;
+  background-color: #fafafa;
+  transition: border 0.3s, background-color 0.3s;
+  position: relative;
+}
+
+.procedure:hover {
+  border-color: var(--primary-color);
+}
+
+.procedure input[type="radio"] {
+  display: none;
+}
+
+.procedure input[type="radio"]:checked + .procedure-info {
+  border-left: 4px solid var(--primary-color);
+  padding-left: 10px;
+  background-color: #f4e3f7;
+}
+
+.procedure-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.procedure-name {
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.procedure-price {
+  font-size: 0.95rem;
+  color: #555;
+}

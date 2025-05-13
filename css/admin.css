@@ -1,288 +1,165 @@
-/* Admin paneļa un publisko lapu vispārējais izkārtojums */
-div.container {
-    max-width: 600px;
-    width: 100%;
-    margin: 50px auto;
-    padding: 20px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    display: block;
-}
-
-/* Virsraksti */
-h1 {
-    font-size: 1.8rem;
-    color: #333;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-h2 {
-    font-size: 1.4rem;
-    color: #333;
-    margin-bottom: 15px;
-}
-
-/* Lietotāja opcijas */
 .user-options {
-    text-align: right;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 10px;
     margin-bottom: 20px;
-}
-
-/* Darbību saite (piem., pievienot pakalpojumu) */
-.action-link {
+  }
+  
+  .action-link {
     display: inline-block;
     padding: 8px 16px;
-    background-color: #28a745;
+    background-color: var(--success-color);
     color: white;
     border-radius: 4px;
     text-decoration: none;
     font-weight: bold;
     transition: background-color 0.3s, transform 0.2s;
-    margin-right: 10px;
-}
-
-.action-link:hover {
-    background-color: #218838;
+  }
+  
+  .action-link:hover {
+    background-color: var(--success-hover);
     transform: translateY(-2px);
-}
-
-.action-link i {
+  }
+  
+  .action-link i {
     margin-right: 5px;
-}
-
-/* Izlogoties saite */
-.logout-link {
+  }
+  
+  .logout-link {
     display: inline-block;
     padding: 8px 16px;
-    background-color: #dc3545;
+    background-color: var(--danger-color);
     color: white;
     border-radius: 4px;
     text-decoration: none;
     font-weight: bold;
     transition: background-color 0.3s, transform 0.2s;
-}
-
-.logout-link:hover {
-    background-color: #c82333;
+  }
+  
+  .logout-link:hover {
+    background-color: var(--danger-hover);
     transform: translateY(-2px);
-}
-
-.logout-link i {
+  }
+  
+  .logout-link i {
     margin-right: 5px;
-}
-
-/* Tabula rezervāciju un pakalpojumu sarakstam */
-table.table {
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto 50px auto;
+  }
+  
+  .table {
+    width: 100%; /* Dinamisks platums */
     border-collapse: collapse;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    display: block;
-}
-
-.table th,
-.table td {
+    margin: 0;
+  }
+  
+  .table th,
+  .table td {
     padding: 12px 15px;
     text-align: left;
     border-bottom: 1px solid #ddd;
-}
-
-.table th {
+  }
+  
+  .table th {
     background-color: #f8f9fa;
     font-weight: bold;
     color: #333;
-}
-
-.table td {
+  }
+  
+  .table td {
     color: #555;
-}
-
-.table-striped tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-.table a {
-    color: #d400ff;
+  }
+  
+  .table tbody tr:hover {
+    background-color: #f1f1f1;
+    transition: background-color 0.2s;
+  }
+  
+  .table a {
+    color: var(--primary-color);
     text-decoration: none;
-}
-
-.table a:hover {
+  }
+  
+  .table a:hover {
     text-decoration: underline;
-}
-
-/* Formas stili (edit.php, login.php, register.php, add_service.php, book.php, add_user.php) */
-div.form-group {
+  }
+  
+  .table th:nth-child(4),
+  .table td:nth-child(4) {
+    min-width: 80px;
+  }
+  
+  .table th:nth-child(6),
+  .table td:nth-child(6) {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .delete-btn {
+    display: inline-block;
+    padding: 5px 10px;
+    background-color: #f44336;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    margin-left: 10px;
+    transition: background-color 0.2s;
+  }
+  
+  .delete-btn:hover {
+    background-color: #da190b;
+  }
+  
+  .form-group {
     margin-bottom: 20px;
     text-align: left;
-}
-
-.form-group label {
+  }
+  
+  .form-group label {
     display: block;
     font-weight: bold;
     margin-bottom: 5px;
     color: #333;
-}
-
-.form-group input,
-.form-group select {
+  }
+  
+  .form-group input,
+  .form-group select {
     width: 100%;
-    max-width: 520px;
     padding: 10px 12px;
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 1rem;
     box-sizing: border-box;
-    display: block;
-    margin: 0 auto;
-}
-
-.form-group input[readonly] {
-    background-color: #e9ecef;
-    cursor: not-allowed;
-}
-
-.form-group select {
-    cursor: pointer;
-}
-
-.form-group input:focus,
-.form-group select:focus {
+  }
+  
+  .form-group input:focus,
+  .form-group select:focus {
     outline: none;
-    border-color: #d400ff;
+    border-color: var(--primary-color);
     box-shadow: 0 0 5px rgba(212, 0, 255, 0.3);
-}
-
-/* Pogas */
-button {
-    background-color: #d400ff !important;
-    color: #fff;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: bold;
-    transition: background-color 0.2s;
-    display: block;
-    margin: 0 auto;
-}
-
-button:hover {
-    background-color: #501054 !important;
-}
-
-/* Ziņojumu stili */
-.message {
-    padding: 10px 15px;
-    margin-bottom: 20px;
-    border-radius: 4px;
-    font-size: 0.95rem;
-    text-align: center;
-    max-width: 520px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.message[style*="color: red"], .message.error {
-    background-color: #f8d7da;
-    color: #721c24;
-}
-
-.message:not([style*="color: red"]):not(.error) {
-    background-color: #d4edda;
-    color: #155724;
-}
-
-/* Laika slotu tabula */
-.timeslots-table {
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-.timeslots-table th, .timeslots-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-}
-
-.timeslots-table th {
-    background-color: #f2f2f2;
-}
-
-/* Pārslēgšanas poga */
-.toggle-btn {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-}
-
-.toggle-btn:hover {
-    background-color: #45a049;
-}
-
-/* Dzēšanas poga */
-.delete-btn {
-    background-color: #f44336;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-}
-
-.delete-btn:hover {
-    background-color: #da190b;
-}
-
-/* Responsivitāte */
-@media (max-width: 768px) {
-    div.container {
-        padding: 15px;
-        margin: 20px auto;
+  }
+  
+  @media (max-width: 768px) {
+    .table {
+      display: block;
+      overflow-x: auto;
+      white-space: nowrap;
     }
-
+  
     .table th,
     .table td {
-        padding: 10px;
-        font-size: 0.9rem;
+      padding: 10px;
+      font-size: 0.9rem;
     }
-
-    table.table, .timeslots-table {
-        max-width: 100%;
-        margin: 0 auto 20px auto;
-    }
-
-    h1 {
-        font-size: 1.5rem;
-    }
-
-    button {
-        width: 100%;
-        padding: 12px;
-    }
-
+  
     .user-options {
-        text-align: center;
+      justify-content: center;
     }
-
-    .action-link {
-        margin-right: 0;
-        margin-bottom: 10px;
+  
+    .form-group input,
+    .form-group select {
+      padding: 8px 10px;
+      font-size: 0.9rem;
     }
-
-    div.form-group input, div.form-group select {
-        padding: 8px 10px;
-        font-size: 0.9rem;
-        max-width: 100%;
-    }
-}
+  }

@@ -10,6 +10,11 @@ if (!isset($_SESSION['admin_id'])) {
     exit;
 }
 
+// Ģenerējam CSRF token, ja tas vēl nav iestatīts
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 // Iegūstam rezervācijas
 try {
     $stmt = $pdo->query("
@@ -38,6 +43,16 @@ try {
     <?php include '../includes/header.php'; ?>
     <div class="container">
         <h1>Visas rezervācijas</h1>
+        <?php
+        // Parādām ziņojumu, ja tāds ir
+        if (isset($_SESSION['message'])) {
+            $message_class = isset($_SESSION['message_type']) && $_SESSION['message_type'] === 'error' ? 'error' : 'success';
+            echo '<div class="message ' . $message_class . '">' . htmlspecialchars($_SESSION['message']) . '</div>';
+            // Notīrām ziņojumu pēc parādīšanas
+            unset($_SESSION['message']);
+            unset($_SESSION['message_type']);
+        }
+        ?>
         <div class="user-options">
             <a href="add_service.php" class="action-link"><i class="fas fa-plus"></i> Pievienot Pakalpojumu</a>
             <a href="services.php" class="action-link"><i class="fas fa-cogs"></i> Pārvaldīt Pakalpojumus</a>
@@ -45,7 +60,10 @@ try {
             <a href="timeslots.php" class="action-link"><i class="fas fa-clock"></i> Pārvaldīt Laika Slotus</a>
             <a href="../logout.php" class="logout-link"><i class="fas fa-sign-out-alt"></i> Izlogoties</a>
         </div>
-        <table class="table table-striped">
+    </div>
+
+    <div class="table-container">
+        <table class="table">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -68,12 +86,16 @@ try {
                         <td><?= htmlspecialchars($row['user_name']); ?></td>
                         <td><?= htmlspecialchars($row['user_phone']); ?></td>
                         <td><?= htmlspecialchars($row['user_email']); ?></td>
-                        <td><a href="edit.php?id=<?= $row['id']; ?>">Rediģēt</a></td>
+                        <td>
+                            <a href="edit.php?id=<?= $row['id']; ?>" class="edit-link">Rediģēt</a>
+                            <a href="delete.php?id=<?= $row['id']; ?>&csrf_token=<?= htmlspecialchars($_SESSION['csrf_token']); ?>" class="delete-btn" onclick="return confirm('Vai tiešām vēlaties dzēst šo rezervāciju?')">Dzēst</a>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
     </div>
+
     <?php include '../includes/footer.php'; ?>
 </body>
 </html>

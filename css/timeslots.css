@@ -1,17 +1,9 @@
-/* Laika slotu konteiners */
-.container {
-  max-width: 520px;
-  width: 100%;
-  margin-bottom: 20px;
-}
-
-/* Katrs day-part (Morning, Day, Evening) */
 .day-part {
   background: #fff;
-  border-radius: 8px;
+  border-radius: var(--border-radius);
   margin-bottom: 20px;
   padding: 15px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow);
   text-align: left;
 }
 
@@ -22,10 +14,10 @@
 }
 
 .time-slots {
-  display: grid; /* Mainām uz grid, lai veidotu kastīti */
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Dinamiskas kolonnas */
-  gap: 10px; /* Atstarpe starp slotiem */
-  justify-items: center; /* Centrē saturu */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+  justify-items: center;
 }
 
 .time-slot {
@@ -36,8 +28,8 @@
   font-size: 0.9rem;
   transition: background-color 0.2s;
   text-align: center;
-  width: 100%; /* Nodrošina, ka sloti aizpilda pieejamo vietu */
-  box-sizing: border-box; /* Padding nepalielina kopējo izmēru */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .time-slot:hover {
@@ -47,17 +39,42 @@
 .time-slot a {
   color: #333;
   text-decoration: none;
-  display: block; /* Nodrošina, ka saite aizpilda visu slotu */
+  display: block;
 }
 
-/* Nav laiku paziņojums */
 .no-spots {
   background: #fff;
-  border-radius: 8px;
-  padding: 20px;
+  border-radius: var(--border-radius);
+  padding: var(--padding);
   margin-bottom: 20px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow);
   width: 320px;
   font-size: 0.95rem;
   line-height: 1.4;
+}
+
+.timeslots-table {
+  width: 100%;
+  max-width: var(--container-width);
+  margin: 0 auto;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.timeslots-table th,
+.timeslots-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.timeslots-table th {
+  background-color: #f2f2f2;
+}
+
+@media (max-width: 768px) {
+  .timeslots-table {
+    max-width: 100%;
+    margin: 0 auto 20px auto;
+  }
 }

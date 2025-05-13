@@ -99,7 +99,8 @@ try {
     <meta charset="UTF-8">
     <title>Ielogoties</title>
     <link rel="stylesheet" href="../css/base.css?v=<?php echo time(); ?>">
-    <link rel="stylesheet" href="../css/public.css?v=<?php echo time(); ?>">
+<link rel="stylesheet" href="../css/public/auth.css?v=<?php echo time(); ?>">
+
 </head>
 <body>
     <?php include '../includes/header.php'; ?>
