@@ -1,24 +1,105 @@
+/* bookings.css */
 .bookings-list {
   background: #fff;
   border-radius: var(--border-radius);
   padding: var(--padding);
-  margin-bottom: 20px;
+  margin: 20px auto;
   box-shadow: var(--shadow);
   max-width: var(--container-width);
-  text-align: left;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.bookings-list h3 {
+  color: #611e71;
+  margin-bottom: 15px;
+  font-size: 1.4rem;
+}
+
+.booking-item {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.booking-item:last-child {
+  border-bottom: none;
+}
+
+.booking-info {
+  flex: 1;
+}
+
+.booking-service {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.booking-details {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.booking-details span {
+  display: inline-block;
+  margin-right: 15px;
 }
 
 .cancel-btn {
-  display: inline-block;
-  padding: 8px 12px;
-  background-color: #ff4d4d;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: #f44336;
   color: #fff;
   text-decoration: none;
-  border-radius: 4px;
-  margin-top: 5px;
-  transition: background-color 0.2s;
+  border-radius: var(--border-radius);
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  border: 2px solid transparent;
 }
 
 .cancel-btn:hover {
-  background-color: #d60000;
+  background-color: #d32f2f;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.cancel-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.cancel-btn i {
+  font-size: 0.8rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .booking-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .cancel-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .booking-details span {
+    display: block;
+    margin-right: 0;
+    margin-bottom: 4px;
+  }
+  
+  .cancel-btn {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
 }

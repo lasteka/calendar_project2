@@ -137,7 +137,7 @@ if ($selected_service_id) {
 
     // Diagnostika: pārbaudām rezultātu
     if (empty($timeslots['Morning']) && empty($timeslots['Day']) && empty($timeslots['Evening'])) {
-        $_SESSION['booking_message'] = "Nav pieejamu laika slotu izvēlētajam pakalpojumam un datumam! Iespējams, visi sloti ir aizņemti vai filtrēšana ir pārāk stingra.";
+        $_SESSION['booking_message'] = "Nav pieejamu laika slotu izvēlētajam pakalpojumam un datumam! Iespējams, visi sloti ir aizņemts vai filtrēšana ir pārāk stingra.";
     }
 }
 
@@ -179,20 +179,33 @@ $selected_slot = $show_services ? $_GET['slot'] : null;
         <?php if (!$show_services): ?>
             <div class="service-selection">
                 <h3>Izvēlieties pakalpojumu</h3>
-                <form action="index.php" method="GET">
-                    <input type="hidden" name="selected_date" value="<?php echo htmlspecialchars($selected_date); ?>">
-                    <input type="hidden" name="month" value="<?php echo $month; ?>">
-                    <input type="hidden" name="year" value="<?php echo $year; ?>">
-                    <label for="service_id">Pakalpojums:</label>
-                    <select name="service_id" id="service_id" onchange="this.form.submit()">
-                        <option value="">Izvēlieties pakalpojumu</option>
-                        <?php foreach ($services as $service): ?>
-                            <option value="<?php echo $service['id']; ?>" <?php echo $selected_service_id == $service['id'] ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars($service['name']) . ' (' . $service['price'] . ' €, ' . $service['duration'] . ' min)'; ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </form>
+                <?php if (empty($services)): ?>
+                    <p>Nav pieejamu pakalpojumu. Lūdzu, sazinieties ar administratoru.</p>
+                <?php else: ?>
+                    <form action="index.php" method="GET">
+                        <input type="hidden" name="selected_date" value="<?php echo htmlspecialchars($selected_date); ?>">
+                        <input type="hidden" name="month" value="<?php echo $month; ?>">
+                        <input type="hidden" name="year" value="<?php echo $year; ?>">
+                        <div class="accordion">
+                            <?php foreach ($services as $service): ?>
+                                <div class="accordion-header">
+                                    <span class="procedure-name"><?= htmlspecialchars($service['name']); ?></span>
+                                    <span class="arrow">▼</span>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="procedure">
+                                        <input type="radio" name="service_id" id="service_<?= $service['id']; ?>" value="<?= $service['id']; ?>" 
+                                               <?php echo $selected_service_id == $service['id'] ? 'checked' : ''; ?> onchange="this.form.submit()">
+                                        <label for="service_<?= $service['id']; ?>" class="procedure-info">
+                                            <span class="procedure-name"><?= htmlspecialchars($service['name']); ?></span>
+                                            <span class="procedure-price"><?= number_format($service['price'], 2); ?> €, <?= $service['duration']; ?> min</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </form>
+                <?php endif; ?>
             </div>
         <?php endif; ?>
 
@@ -214,5 +227,7 @@ $selected_slot = $show_services ? $_GET['slot'] : null;
     </div>
     <?php include '../includes/footer.php'; ?>
     <script src="../js/accordion.js"></script>
+    <!-- Izdzēsts select.js, jo tas rada nevēlamo dizainu -->
+    <!-- <script src="../js/select.js"></script> -->
 </body>
 </html>
