@@ -57,10 +57,19 @@ $selected_date = isset($_GET['selected_date']) ? $_GET['selected_date'] : date('
 // Iegūstam pakalpojumus
 $stmt = $pdo->query("SELECT id, name, price, duration FROM services");
 $services = $stmt->fetchAll();
+if (empty($services)) {
+    $_SESSION['booking_message'] = "Nav atrasti pakalpojumi datubāzē!";
+}
 
 // Iegūstam aktīvos laika slotus
-$stmt = $pdo->query("SELECT id, day_part, time_slot FROM timeslots WHERE is_active = 1 ORDER BY FIELD(day_part, 'Morning', 'Day', 'Evening'), STR_TO_DATE(time_slot, '%H:%i')");
+$stmt = $pdo->prepare("SELECT id, day_part, time_slot FROM timeslots WHERE is_active = ? ORDER BY FIELD(day_part, 'Morning', 'Day', 'Evening'), STR_TO_DATE(time_slot, '%H:%i')");
+$stmt->execute([1]);
 $all_timeslots = $stmt->fetchAll();
+
+// Diagnostika: pārbaudām laika slotus
+if (empty($all_timeslots)) {
+    $_SESSION['booking_message'] = "Nav atrasti aktīvi laika sloti datubāzē!";
+}
 
 // Grupējam laika slotus pa dienas daļām
 $timeslots_by_daypart = [];
@@ -74,18 +83,22 @@ $stmt->execute([$selected_date]);
 $booked_slots = $stmt->fetchAll();
 
 // Filtrējam pieejamos laika slotus, ņemot vērā pakalpojuma ilgumu
-$timeslots = [];
+$timeslots = ['Morning' => [], 'Day' => [], 'Evening' => []];
 $selected_service_id = $_GET['service_id'] ?? null;
 if ($selected_service_id) {
     // Iegūstam pakalpojuma ilgumu
     $stmt = $pdo->prepare("SELECT duration FROM services WHERE id = ?");
     $stmt->execute([$selected_service_id]);
     $service = $stmt->fetch();
-    $duration = $service ? $service['duration'] : 30;
+    if (!$service) {
+        $_SESSION['booking_message'] = "Izvēlētais pakalpojums nav atrasts!";
+        header("Location: index.php?selected_date=" . urlencode($selected_date));
+        exit;
+    }
+    $duration = $service['duration'];
     $required_slots = ceil($duration / 30);
 
     foreach ($timeslots_by_daypart as $day_part => $slots) {
-        $timeslots[$day_part] = [];
         foreach ($slots as $slot) {
             $slot_time = $slot['time_slot'];
             $is_available = true;
@@ -94,8 +107,8 @@ if ($selected_service_id) {
             for ($i = 0; $i < $required_slots; $i++) {
                 $next_time = date('H:i', strtotime("$slot_time + " . ($i * 30) . " minutes"));
                 // Pārbaudām, vai slots eksistē un ir aktīvs
-                $stmt = $pdo->prepare("SELECT COUNT(*) FROM timeslots WHERE time_slot = ? AND is_active = 1");
-                $stmt->execute([$next_time]);
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM timeslots WHERE time_slot = ? AND is_active = ?");
+                $stmt->execute([$next_time, 1]);
                 if ($stmt->fetchColumn() == 0) {
                     $is_available = false;
                     break;
@@ -120,6 +133,11 @@ if ($selected_service_id) {
                 $timeslots[$day_part][] = $slot_time;
             }
         }
+    }
+
+    // Diagnostika: pārbaudām rezultātu
+    if (empty($timeslots['Morning']) && empty($timeslots['Day']) && empty($timeslots['Evening'])) {
+        $_SESSION['booking_message'] = "Nav pieejamu laika slotu izvēlētajam pakalpojumam un datumam! Iespējams, visi sloti ir aizņemti vai filtrēšana ir pārāk stingra.";
     }
 }
 
@@ -175,9 +193,6 @@ $selected_slot = $show_services ? $_GET['slot'] : null;
                         <?php endforeach; ?>
                     </select>
                 </form>
-                <?php if ($selected_service_id && empty($timeslots['Morning']) && empty($timeslots['Day']) && empty($timeslots['Evening'])): ?>
-                    <p>Nav pieejamu laika slotu šim pakalpojumam un datumam.</p>
-                <?php endif; ?>
             </div>
         <?php endif; ?>
 
@@ -185,6 +200,8 @@ $selected_slot = $show_services ? $_GET['slot'] : null;
         <?php if ($selected_service_id && !$show_services): ?>
             <div class="timeslots-section">
                 <h3>Pieejamie laika sloti <?php echo htmlspecialchars($selected_date); ?></h3>
+                <!-- Pagaidu diagnostika -->
+                <pre><?php // print_r($timeslots); ?></pre>
                 <?php include '../includes/timeslots.php'; ?>
             </div>
         <?php endif; ?>
@@ -196,5 +213,6 @@ $selected_slot = $show_services ? $_GET['slot'] : null;
         <?php include '../includes/bookings.php'; ?>
     </div>
     <?php include '../includes/footer.php'; ?>
+    <script src="../js/accordion.js"></script>
 </body>
 </html>

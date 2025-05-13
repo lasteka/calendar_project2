@@ -1,3 +1,4 @@
+/* Esošie kalendāra stili saglabāti */
 .calendar-container {
   background: #fff;
   border-radius: var(--border-radius);
@@ -94,4 +95,87 @@
 .selected {
   background-color: #d3d3d3;
   font-weight: bold;
+}
+
+/* Akordeona stili */
+.accordion {
+  margin-top: 20px;
+}
+
+.accordion-header {
+  background-color: #f4f4f4;
+  padding: 12px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 500;
+  border-bottom: 1px solid #ddd;
+  transition: background-color 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.accordion-header:hover {
+  background-color: #e0e0e0;
+}
+
+.accordion-header.active {
+  background-color: #d3d3d3;
+}
+
+.accordion-header .arrow {
+  transition: transform 0.3s ease;
+}
+
+.accordion-header.active .arrow {
+  transform: rotate(180deg);
+}
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  padding: 0 15px;
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+.accordion-content.active {
+  max-height: 500px; /* Palielināts, lai ietilpinātu visus slotus */
+  padding: 15px;
+}
+
+.time-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.time-slot {
+  padding: 8px 12px;
+  background-color: #e6f7ff;
+  border-radius: 4px;
+}
+
+.time-slot a {
+  text-decoration: none;
+  color: #333;
+}
+
+.time-slot:hover {
+  background-color: #d3eaff;
+}
+
+@media (max-width: 600px) {
+  .accordion-header {
+    font-size: 1rem;
+    padding: 10px;
+  }
+  .accordion-content.active {
+    padding: 10px;
+  }
+  .time-slot {
+    padding: 6px 10px;
+    font-size: 0.9rem;
+  }
 }

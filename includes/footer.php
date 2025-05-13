@@ -1,5 +1,4 @@
 <footer>
-    <p>© <?php echo date('Y'); ?> MR ONLAINS. Visas tiesības aizsargātas.</p>
+  <p>© <?php echo date('Y'); ?> Rezervāciju Sistēma</p>
 </footer>
-</body>
-</html>
+<script src="/js/accordion.js"></script>
