@@ -4,23 +4,20 @@ runMiddleware();
 require_once '../config/db_connection.php';
 
 // Pārbaudām, vai lietotājs ir ielogojies
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit;
+$is_logged_in = isset($_SESSION['user_id']);
+$user_id = $is_logged_in ? (int)$_SESSION['user_id'] : null;
+if ($is_logged_in) {
+    $stmt = $pdo->prepare("SELECT name, phone FROM users WHERE id = ?");
+    $stmt->execute([$user_id]);
+    $user = $stmt->fetch();
+    if (!$user) {
+        header("Location: logout.php");
+        exit;
+    }
 }
 
-// Iegūstam lietotāja datus
-$user_id = (int)$_SESSION['user_id'];
-$stmt = $pdo->prepare("SELECT name, phone FROM users WHERE id = ?");
-$stmt->execute([$user_id]);
-$user = $stmt->fetch();
-if (!$user) {
-    header("Location: logout.php");
-    exit;
-}
-
-// Apstrādājam rezervācijas atcelšanu
-if (isset($_GET['action']) && $_GET['action'] === 'cancel_booking' && isset($_GET['booking_id'])) {
+// Apstrādājam rezervācijas atcelšanu (tikai reģistrētiem lietotājiem)
+if ($is_logged_in && isset($_GET['action']) && $_GET['action'] === 'cancel_booking' && isset($_GET['booking_id'])) {
     $booking_id = (int)$_GET['booking_id'];
     $stmt = $pdo->prepare("DELETE FROM bookings WHERE id = ? AND user_id = ?");
     $stmt->execute([$booking_id, $user_id]);
@@ -144,6 +141,7 @@ if ($selected_service_id) {
 // Pakalpojumu un laika slota izvēle
 $show_services = isset($_GET['action']) && $_GET['action'] === 'show_services' && isset($_GET['slot']);
 $selected_slot = $show_services ? $_GET['slot'] : null;
+$guest_booking = !$is_logged_in && $show_services; // Režīms viesu rezervācijai
 ?>
 
 <!DOCTYPE html>
@@ -162,9 +160,11 @@ $selected_slot = $show_services ? $_GET['slot'] : null;
 <body>
     <?php include '../includes/header.php'; ?>
     <div class="container">
-        <div class="user-options">
-            <a href="../logout.php" class="logout-link"><i class="fas fa-sign-out-alt"></i> Izlogoties</a>
-        </div>
+        <?php if ($is_logged_in): ?>
+            <div class="user-options">
+                <a href="../logout.php" class="logout-link"><i class="fas fa-sign-out-alt"></i> Izlogoties</a>
+            </div>
+        <?php endif; ?>
 
         <?php if (isset($_SESSION['booking_message'])): ?>
             <div class="message">
@@ -220,14 +220,39 @@ $selected_slot = $show_services ? $_GET['slot'] : null;
         <?php endif; ?>
 
         <!-- Pakalpojumu apstiprināšana -->
-        <?php include '../includes/procedures.php'; ?>
+        <?php if ($show_services): ?>
+            <?php if ($is_logged_in): ?>
+                <?php include '../includes/procedures.php'; ?>
+            <?php elseif ($guest_booking): ?>
+                <div class="guest-booking">
+                    <h3>Apstipriniet rezervāciju</h3>
+                    <form method="POST" action="book.php">
+                        <input type="hidden" name="action" value="book_service">
+                        <input type="hidden" name="slot" value="<?= htmlspecialchars($selected_slot); ?>">
+                        <input type="hidden" name="booking_date" value="<?= htmlspecialchars($selected_date); ?>">
+                        <input type="hidden" name="month" value="<?= htmlspecialchars($month); ?>">
+                        <input type="hidden" name="year" value="<?= htmlspecialchars($year); ?>">
+                        <div class="form-group">
+                            <label for="guest_name">Vārds:*</label>
+                            <input type="text" id="guest_name" name="guest_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="guest_phone">Tālrunis:*</label>
+                            <input type="tel" id="guest_phone" name="guest_phone" pattern="[0-9+]{8,15}" required placeholder="+371XXXXXXXXX">
+                        </div>
+                        <button type="submit">Rezervēt</button>
+                    </form>
+                    <p>* Obligāti aizpildāmi lauki. Pēc rezervācijas jums būs jāpiesakās vai jāreģistrējas, lai pārvaldītu rezervācijas.</p>
+                </div>
+            <?php endif; ?>
+        <?php endif; ?>
 
-        <!-- Lietotāja rezervācijas -->
-        <?php include '../includes/bookings.php'; ?>
+        <!-- Lietotāja rezervācijas (tikai reģistrētiem lietotājiem) -->
+        <?php if ($is_logged_in): ?>
+            <?php include '../includes/bookings.php'; ?>
+        <?php endif; ?>
     </div>
     <?php include '../includes/footer.php'; ?>
     <script src="../js/accordion.js"></script>
-    <!-- Izdzēsts select.js, jo tas rada nevēlamo dizainu -->
-    <!-- <script src="../js/select.js"></script> -->
 </body>
 </html>

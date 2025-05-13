@@ -1,0 +1,110 @@
+/* Rezervācijas ziņojumu stili */
+.message {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    font-size: 1rem;
+    text-align: center;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  }
+  
+  .message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+  
+  /* Viesu rezervācijas formas stili */
+  .guest-booking {
+    background: #fff;
+    border-radius: 4px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    max-width: var(--container-width, 600px);
+  }
+  
+  .guest-booking h3 {
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    color: #333;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  
+  .form-group input:focus {
+    border-color: var(--primary-color, #611e71);
+    outline: none;
+  }
+  
+  .guest-booking button[type="submit"] {
+    background-color: var(--primary-color, #611e71);
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  
+  .guest-booking button[type="submit"]:hover {
+    background-color: #7a2d8c;
+  }
+  
+  .guest-booking p {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 10px;
+  }
+  
+  /* Saitēm viesu formā */
+  .guest-links {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 0.9rem;
+  }
+  
+  .guest-link {
+    color: var(--primary-color, #611e71);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .guest-link:hover {
+    text-decoration: underline;
+    color: #7a2d8c;
+  }
+  
+  /* Papildu stili potenciālai rezervācijas formas atgriezeniskajai saitei */
+  .booking-feedback {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #f1f1f1;
+    border-left: 4px solid #611e71;
+    font-size: 0.95rem;
+    color: #333;
+  }
