@@ -97,6 +97,34 @@
   font-weight: bold;
 }
 
+.calendar td.has-available-slots {
+  background-color: #e6ffe6; /* Light green for days with slots */
+  /* font-weight: bold; */ /* Optional: make text bolder */
+}
+
+.calendar td.has-available-slots a {
+  /* color: #006400; */ /* Darker green text for contrast, if needed */
+}
+
+/* Optional: Dot indicator styles */
+/*
+.calendar td.has-available-slots {
+    position: relative;
+}
+
+.calendar td.has-available-slots::after {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    background-color: green;
+    border-radius: 50%;
+}
+*/
+
 /* Akordeona stili */
 .accordion {
   margin-top: 20px;

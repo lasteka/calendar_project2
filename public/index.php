@@ -211,7 +211,7 @@ $guest_booking = !$is_logged_in && $show_services; // Režīms viesu rezervācij
 
         <!-- Laika slotu izvēle -->
         <?php if ($selected_service_id && !$show_services): ?>
-            <div class="timeslots-section">
+            <div id="timeslots-ajax-container" class="timeslots-section">
                 <h3>Pieejamie laika sloti <?php echo htmlspecialchars($selected_date); ?></h3>
                 <!-- Pagaidu diagnostika -->
                 <pre><?php // print_r($timeslots); ?></pre>

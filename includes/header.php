@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../css/timeslots.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="../css/procedures.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="../css/bookings.css?v=<?php echo time(); ?>">
+    <script src="../js/calendar.js" defer></script>
 </head>
 <body>
     <header>
