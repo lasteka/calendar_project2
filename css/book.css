@@ -25,60 +25,71 @@
   /* Viesu rezervācijas formas stili */
   .guest-booking {
     background: #fff;
-    border-radius: 4px;
     padding: 20px;
+    border-radius: var(--border-radius, 4px);
+    box-shadow: var(--shadow, 0 2px 5px rgba(0,0,0,0.1));
     margin-top: 20px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     max-width: var(--container-width, 600px);
+    margin-left: auto;
+    margin-right: auto;
   }
   
   .guest-booking h3 {
     margin-bottom: 15px;
-    font-size: 1.2rem;
+    font-size: 1.3rem; /* Adjusted to match .booking-confirmation h2 */
     color: #333;
+    text-align: center; /* Added for consistency */
   }
   
-  .form-group {
+  .guest-booking .form-group { /* .form-group is more generic, ensure no conflicts or scope if needed */
     margin-bottom: 15px;
   }
   
-  .form-group label {
+  .guest-booking label { /* Scoped to .guest-booking */
     display: block;
     margin-bottom: 5px;
     font-weight: 500;
+    color: #333; /* Added for consistency */
   }
   
-  .form-group input {
+  .guest-booking input[type="text"],
+  .guest-booking input[type="tel"] {
     width: 100%;
-    padding: 8px;
+    padding: 10px; /* Standardized padding */
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: var(--border-radius, 4px);
     box-sizing: border-box;
   }
   
-  .form-group input:focus {
+  .guest-booking input[type="text"]:focus,
+  .guest-booking input[type="tel"]:focus {
     border-color: var(--primary-color, #611e71);
     outline: none;
+    box-shadow: 0 0 0 2px rgba(97, 30, 113, 0.2); /* Added focus style */
   }
   
   .guest-booking button[type="submit"] {
+    display: block; /* Added for consistency */
+    width: 100%; /* Added for consistency */
+    padding: 10px 15px; /* Standardized padding */
     background-color: var(--primary-color, #611e71);
     color: #fff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
+    border: none; /* Ensure no default border */
+    border-radius: var(--border-radius, 4px);
     cursor: pointer;
     font-size: 1rem;
+    transition: background-color 0.2s ease; /* Added transition */
   }
   
   .guest-booking button[type="submit"]:hover {
-    background-color: #7a2d8c;
+    background-color: #7a2d8c; /* Darken primary color */
   }
   
-  .guest-booking p {
+  .guest-booking p { /* Scoped to .guest-booking */
     font-size: 0.9rem;
     color: #666;
-    margin-top: 10px;
+    margin-top: 15px; /* Standardized margin */
+    text-align: center; /* Added for consistency */
   }
   
   /* Saitēm viesu formā */
@@ -108,3 +119,78 @@
     font-size: 0.95rem;
     color: #333;
   }
+
+/* Styling for Logged-in User Booking Confirmation */
+.booking-confirmation {
+    background: #ffffff; /* Similar to guest-booking or a distinct style */
+    border-radius: var(--border-radius, 4px);
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: var(--shadow, 0 2px 5px rgba(0,0,0,0.1));
+    max-width: var(--container-width, 600px);
+    margin-left: auto; /* Center it if max-width is applied */
+    margin-right: auto;
+}
+
+.booking-confirmation h2 {
+    margin-bottom: 15px;
+    font-size: 1.3rem; /* Match guest-booking h3 or define */
+    color: #333;
+    text-align: center;
+}
+
+.booking-summary {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa; /* Light background for summary box */
+    border: 1px solid #e0e0e0;
+    border-radius: var(--border-radius, 4px);
+}
+
+.booking-summary p {
+    margin-bottom: 8px;
+    font-size: 1rem;
+    color: #333;
+}
+
+.booking-summary p strong {
+    color: #000;
+}
+
+.confirmation-form .form-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between; /* Or 'flex-end' or 'center' depending on desired layout */
+    gap: 10px;
+}
+
+/* Assuming .btn styles (like for cancel/confirm) exist in base.css or similar */
+/* If not, basic button styling for .btn.confirm and .btn.cancel: */
+.confirmation-form .btn {
+    padding: 10px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 1rem;
+    cursor: pointer;
+    text-align: center;
+}
+
+.confirmation-form .btn.confirm {
+    background-color: var(--primary-color, #611e71);
+    color: #fff;
+    border: 1px solid var(--primary-color, #611e71);
+}
+.confirmation-form .btn.confirm:hover {
+    background-color: #7a2d8c; /* Darken primary color */
+    border-color: #7a2d8c;
+}
+
+.confirmation-form .btn.cancel {
+    background-color: #ccc;
+    color: #333;
+    border: 1px solid #ccc;
+}
+.confirmation-form .btn.cancel:hover {
+    background-color: #bbb;
+    border-color: #bbb;
+}

@@ -228,6 +228,7 @@ $guest_booking = !$is_logged_in && $show_services; // Režīms viesu rezervācij
                     <h3>Apstipriniet rezervāciju</h3>
                     <form method="POST" action="book.php">
                         <input type="hidden" name="action" value="book_service">
+                        <input type="hidden" name="service_id" value="<?= htmlspecialchars($selected_service_id); ?>">
                         <input type="hidden" name="slot" value="<?= htmlspecialchars($selected_slot); ?>">
                         <input type="hidden" name="booking_date" value="<?= htmlspecialchars($selected_date); ?>">
                         <input type="hidden" name="month" value="<?= htmlspecialchars($month); ?>">

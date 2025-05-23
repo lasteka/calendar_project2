@@ -130,21 +130,24 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (Object.keys(data).every(dayPart => data[dayPart].length === 0)) {
                 contentHTML += '<p>No available time slots for this date and service.</p>';
             } else {
-                for (const dayPart in data) {
+                for (const dayPart in data) { // data is like {"Morning": [...], "Day": [...], "Evening": [...]}
                     if (data[dayPart].length > 0) {
-                        contentHTML += `<div class="day-part"><h4>${dayPart}</h4><ul class="time-slots-list">`;
+                        contentHTML += `<div class="day-part">`;
+                        contentHTML += `<h2>${dayPart}</h2>`; // Changed to h2
+                        contentHTML += `<div class="time-slots">`; // Changed to div.time-slots
+                        
                         data[dayPart].forEach(slot => {
-                            // Construct the booking link carefully, matching public/index.php structure
-                            // index.php?action=show_services&slot=TIME&selected_date=DATE&service_id=SERVICE_ID&month=MONTH&year=YEAR
-                            // We need month and year of the selectedDate for the link to maintain calendar context if user navigates away and back.
+                            // slot is expected to be an object like { time: "09:00", id: 123 }
                             const dateObj = new Date(selectedDate + 'T00:00:00'); // Ensure parsing as local date
                             const month = dateObj.getMonth() + 1;
                             const year = dateObj.getFullYear();
 
                             const link = `index.php?action=show_services&slot=${encodeURIComponent(slot.time)}&selected_date=${encodeURIComponent(selectedDate)}&service_id=${encodeURIComponent(serviceId)}&month=${month}&year=${year}`;
-                            contentHTML += `<li><a href="${link}" class="time-slot-link">${slot.time}</a></li>`;
+                            // Changed structure to div.time-slot > a
+                            contentHTML += `<div class="time-slot"><a href="${link}">${slot.time}</a></div>`; 
                         });
-                        contentHTML += `</ul></div>`;
+                        contentHTML += `</div>`; // Close div.time-slots
+                        contentHTML += `</div>`; // Close div.day-part
                     }
                 }
             }

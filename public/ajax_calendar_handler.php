@@ -1,5 +1,5 @@
 <?php
-session_start(); // Required if availability_functions.php or db.php uses sessions
+require_once '../middleware.php'; // Handles session start and other middleware
 require_once '../config/db_connection.php'; // Ensure this is your correct path to PDO
 require_once '../includes/availability_functions.php'; // Path to your new functions
 

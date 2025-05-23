@@ -11,6 +11,10 @@ try {
         ]
     );
 } catch (PDOException $e) {
-    die("Savienojuma kļūda: " . $e->getMessage());
+    // Log the error for server records if possible (optional, advanced)
+    // error_log("Database connection error: " . $e->getMessage()); 
+            
+    // Re-throw the exception to be handled by the calling script
+    throw new PDOException("Savienojuma kļūda: " . $e->getMessage(), (int)$e->getCode());
 }
 ?>

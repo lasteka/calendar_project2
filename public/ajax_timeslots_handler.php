@@ -1,9 +1,7 @@
 <?php
-session_start(); // Required for middleware and potential user session data
+require_once '../middleware.php'; // Handles session start and other middleware
+runMiddleware(); // Executes middleware logic (e.g., maintenance check)
 require_once '../config/db_connection.php';
-// require_once '../middleware.php'; // Decide if full middleware is needed or just user session check
-// runMiddleware(); // If using middleware
-
 require_once '../includes/availability_functions.php'; // Path to your new functions
 
 header('Content-Type: application/json');
